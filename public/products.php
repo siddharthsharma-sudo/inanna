@@ -1,7 +1,7 @@
 <?php
 // public/products.php - fetches from DB via PDO
 
-require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../public/includes/db.php';
 $stmt = $pdo->query("SELECT id, sku, name, price, stock, image, LEFT(description,200) AS short FROM products ORDER BY created_at DESC");
 $products = $stmt->fetchAll();
 
