@@ -107,7 +107,6 @@ function isActive($filename) {
             top: 0;
             width: 100vw;
             height: 100vh;
-            background: #fff;
             transition: left 0.35s ease;
             z-index: 99999;
             padding: 20px;
@@ -127,7 +126,11 @@ function isActive($filename) {
         .custom-navbar { max-width:1424px; }
         .cart-img { width:36px; height:36px; object-fit:contain; }
 
-        @media (max-width: 768px) { .desktop-links { display:none !important; } }
+        @media (max-width: 768px) { .desktop-links { display:none !important; }
+        .sidebar {
+            background: #fff !important;    
+        }
+     }
         @media (min-width: 992px) { .mobile-hamburger { display:none !important; } }
 
         /* small active link tweak */
