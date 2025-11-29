@@ -1,14 +1,12 @@
 <?php
 // public/register.php
-// Registration form + processing in one file
+// DB connection
+require_once __DIR__ . '/includes/db.php';
 
-// DB connection (project-level includes)
-require_once __DIR__ . '/../public/includes/db.php';
-
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 
 // If already logged in, redirect to account
-if (!empty($_SESSION['user_id'])) {
+if (!empty($_SESSION['user']) && !empty($_SESSION['user']['id'])) {
     header('Location: account.php');
     exit;
 }
@@ -47,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // check if email already exists
         $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email LIMIT 1");
         $stmt->execute(['email'=>$email]);
-        if ($stmt->fetch()) {
+        if ($stmt->fetch(PDO::FETCH_ASSOC)) {
             $errors[] = "An account with that email already exists.";
         } else {
             // create user
@@ -59,10 +57,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'hash'=>$hash,
                 'phone'=>$phone
             ]);
-            // auto-login (optional) — set session and redirect to account
+            // auto-login — set normalized session user and redirect to account
             $userId = $pdo->lastInsertId();
-            $_SESSION['user_id'] = $userId;
-            $_SESSION['user_name'] = $name;
+            $_SESSION['user'] = [
+                'id' => (int)$userId,
+                'name' => $name,
+                'username' => $email,
+                'is_admin' => 0
+            ];
+            // legacy vars kept for compatibility
+            $_SESSION['user_id'] = $_SESSION['user']['id'];
+            $_SESSION['user_name'] = $_SESSION['user']['name'];
+
             header('Location: account.php?welcome=1');
             exit;
         }
