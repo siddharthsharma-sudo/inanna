@@ -22,7 +22,7 @@ $publicSegment = $projectUri . '/public';
 // Normalize comparison to ensure trailing slashes don't confuse it
 $normalizedReq = rtrim($reqPath, '/');
 $normalizedPublic = rtrim($publicSegment, '/');
-
+ 
 if (strpos($normalizedReq, $normalizedPublic) === 0) {
     // Already inside public; no redirect needed — but normalize to include query if you want:
     $target = $reqPath . ($reqQuery !== '' ? '?' . $reqQuery : '');
