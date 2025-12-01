@@ -220,7 +220,7 @@ h1, h2, h3, h4, h5, h6, .display-1, .display-2, .display-3 { font-family: 'Cormo
  
 @media (max-width: 480px) {
     .fashion-content { padding: 10px; }
-    .fashion-content h1 { font-size: 30px; }
+    .fashion-content h1 { font-size: 30px; } 
     .hero-arrow { display: none; }
     .hero-cta { padding: 10px 20px; font-size: 0.9rem; }
     .swiper-horizontal>.swiper-pagination-bullets, .swiper-pagination-bullets.swiper-pagination-horizontal, .swiper-pagination-custom, .swiper-pagination-fraction{
