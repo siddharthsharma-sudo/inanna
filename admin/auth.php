@@ -17,7 +17,7 @@ function require_admin() {
 }
 
 // optional: get admin info
-function current_admin_info(PDO $pdo = null) {
+function current_admin_info(?PDO $pdo = null) {
     if (empty($_SESSION['admin_id'])) return null;
     if ($pdo) {
         $stmt = $pdo->prepare("SELECT id, name, email, role FROM users WHERE id = :id LIMIT 1");
