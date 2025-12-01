@@ -10,6 +10,7 @@ $pageTitle = 'Inanna · Home';
 // include header
 include __DIR__ . '/includes/header.php';
 
+
 // include hero banner (use __DIR__ to ensure correct path)
 if (file_exists(__DIR__ . '/Hero_banner.php')) {
     require __DIR__ . '/Hero_banner.php';
@@ -29,7 +30,7 @@ if (file_exists($productsGridPath)) {
 ?>
 
 <!-- ====== Second section (promo) ========================== -->
-<style>
+<!-- <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap');
 
 :root {
@@ -189,10 +190,15 @@ if (file_exists($productsGridPath)) {
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- ========Collection============= -->
 <?php
+
+if (file_exists(__DIR__ . '/cards-parallax.php')) {
+    require __DIR__ . '/cards-parallax.php';
+}
+
 if (file_exists(__DIR__ . '/collection.php')) {
     require __DIR__ . '/collection.php';
 }

@@ -2,7 +2,7 @@
 <footer class="main-footer">
     <div class="footer-container">
         <div class="footer-logo">
-            <img src="path/to/your/logo.png" alt="World of Finanna Logo">
+            <img src="/inanna/public/assets/images/footer-logo.png" alt="World of INANNA Logo">
         </div>
 
         <div class="footer-links-wrapper">
@@ -79,7 +79,7 @@
     /* The provided image shows the logo clearly, adjust size as needed */
     width: 150px; 
     height: auto;
-    filter: brightness(100); /* Ensures the logo looks white/light */
+     
 }
 
 /* --- Links Wrapper (Holds all link columns) --- */

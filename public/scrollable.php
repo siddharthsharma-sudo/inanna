@@ -2,59 +2,95 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-    :root { 
-        --font-primary: 'Playfair Display', serif;
-        --text-color: #333;
-    }
+:root { 
+    --font-primary: 'Playfair Display', serif;
+    --text-color: #333;
+}
 
-    .expressive-wrapper {
-        padding: 60px 0;
-        text-align: center;
-        font-family: var(--font-primary);
-        color: var(--text-color);
-    }
+.expressive-wrapper {
+    padding: 60px 0;
+    text-align: center;
+    font-family: var(--font-primary);
+    color: var(--text-color);
+}
 
-    .expressive-title {
-        font-size: 2.5rem;
-        letter-spacing: 5px;
-        margin-bottom: 5px;
-    }
+.expressive-title {
+    font-size: 2.5rem;
+    letter-spacing: 5px;
+    margin-bottom: 5px;
+}
 
-    .expressive-subtitle {
-        font-size: 1.2rem;
-        letter-spacing: 12px;
-        color: #555;
-        margin-bottom: 50px;
+.expressive-subtitle {
+    font-size: 1.2rem;
+    letter-spacing: 12px;
+    color: #555;
+    margin-bottom: 50px;
+}
+
+.expressive-gallery {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 15px;
+    flex-wrap: nowrap;
+    position: relative;
+}
+
+.expressive-card {
+    overflow: hidden;
+    border-radius: 3px;
+    transition: 0.3s ease;
+}
+
+.small { width: 170px; height: 250px; margin-bottom:5.6rem; }
+.medium { width: 220px; height: 350px; margin-bottom:4rem;}
+.large { width: 320px; height: 500px; }
+
+.expressive-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ---------------- MOBILE STYLING ---------------- */
+@media (max-width: 768px) {
+
+    /* Show only first 3 cards */
+    .expressive-gallery .expressive-card:nth-child(4),
+    .expressive-gallery .expressive-card:nth-child(5) {
+        display: none;
     }
 
     .expressive-gallery {
-        display: flex;
         justify-content: center;
+        gap: 10px;
+        flex-wrap: nowrap;
         align-items: flex-end;
-        gap: 15px;
     }
 
-    .expressive-card {
-        overflow: hidden;
-        border-radius: 3px;
-        transition: 0.3s ease;
+    /* LEFT (small) */
+    .expressive-gallery .expressive-card:nth-child(1) {
+        width: 95px;
+        height: 135px;
+        order: 1;
+        margin-bottom:2rem;
     }
 
-    .small { width: 170px; height: 250px; }
-    .medium { width: 220px; height: 350px; }
-    .large { width: 320px; height: 500px; }
-
-    @media (max-width: 768px) {
-        .small { width: 90px; height: 150px; }
-        .medium { width: 120px; height: 240px; }
-        .large { width: 180px; height: 350px; }
+    /* CENTER (large) */
+    .expressive-gallery .expressive-card:nth-child(3) {
+        width: 150px;
+        height: 240px;
+        order: 2;
     }
 
-    .expressive-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+    /* RIGHT (small)  */
+    .expressive-gallery .expressive-card:nth-child(2) {
+        width: 95px;
+        height: 135px;
+        order: 3;
+        margin-bottom:2rem;
     }
+}
 </style>
 
 <section class="expressive-wrapper">
