@@ -148,65 +148,39 @@ include __DIR__ . '/../../includes/header.php';
     </div>
 </section>
 
-<section class="py-24 md:py-32 bg-brand-gray border-t border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8">
-        <h2 class="text-center font-serif-cormorant text-3xl font-light mb-16">
-            The Collection's Signature Details
-        </h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-
-            <div class="text-center group p-4 animate-fade-in" style="animation-delay: 0.1s;">
-                <div class="w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full border border-brand-black transition-colors duration-500 group-hover:bg-brand-black">
-                    <svg class="w-6 h-6 transition-colors duration-500 group-hover:text-white text-brand-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.09 2.09L21 8m-6-4l-1.05 1.05M5.91 18.09L8 20.2M15 9l-1.05 1.05M9 4l1.05 1.05M4 9l1.05 1.05M18 15l1.05 1.05M18 9l1.05 1.05"></path></svg>
-                </div>
-                <h3 class="font-serif-cormorant text-xl font-medium mb-3">Signature Detail</h3>
-                <p class="text-sm text-gray-600">Hand-embroidered corsets, structured silks, and featherlight fabrics that catch the eye without trying.</p>
-            </div>
-
-            <div class="text-center group p-4 animate-fade-in" style="animation-delay: 0.3s;">
-                <div class="w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full border border-brand-black transition-colors duration-500 group-hover:bg-brand-black">
-                    <svg class="w-6 h-6 transition-colors duration-500 group-hover:text-white text-brand-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                </div>
-                <h3 class="font-serif-cormorant text-xl font-medium mb-3">Modern Contrast</h3>
-                <p class="text-sm text-gray-600">Muted black and nude tones punctuated by deep, strategic bursts of burgundy that assert presence.</p>
-            </div>
-
-            <div class="text-center group p-4 animate-fade-in" style="animation-delay: 0.5s;">
-                <div class="w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full border border-brand-black transition-colors duration-500 group-hover:bg-brand-black">
-                    <svg class="w-6 h-6 transition-colors duration-500 group-hover:text-white text-brand-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                </div>
-                <h3 class="font-serif-cormorant text-xl font-medium mb-3">After Hours</h3>
-                <p class="text-sm text-gray-600">Designed for the kind of night that becomes a story.</p>
-            </div>
-
-        </div>
-    </div>
-</section>
-
 <section id="products" class="py-24 md:py-32 bg-white">
     <div class="container-xl mx-auto px-6 lg:px-8">
         
         <header class="flex flex-col md:flex-row justify-between items-center mb-12">
             <h2 class="font-serif-cormorant text-4xl font-light mb-6 md:mb-0">Featured Products</h2>
             
-            <div class="flex space-x-6 text-sm uppercase tracking-widest font-light border-b border-gray-300">
+            <!-- <div class="flex space-x-6 text-sm uppercase tracking-widest font-light border-b border-gray-300">
                 <button class="pb-2 border-b-2 border-brand-black font-semibold">All</button>
-                <button class="pb-2 border-b-2 border-transparent hover:border-gray-500 transition-colors">Tops</button>
+                <button class="pb-2 border-b-2 border-transparent hover:border-gray-500 transition-colors">Dress</button>
                 <button class="pb-2 border-b-2 border-transparent hover:border-gray-500 transition-colors">Bottoms</button>
                 <button class="pb-2 border-b-2 border-transparent hover:border-gray-500 transition-colors">Dresses</button>
-            </div>
+            </div> -->
         </header>
 
         <div class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             <?php
             $products = [
-                ["name" => "The Midnight Corset", "category" => "Tops", "price" => "₹ 18,999", "seed" => 10],
-                ["name" => "Obsidian Blazer", "category" => "Jacket", "price" => "₹ 24,500", "seed" => 11],
-                ["name" => "Sheer Desire Skirt", "category" => "Bottoms", "price" => "₹ 12,200", "seed" => 12],
-                ["name" => "Velvet Slip Dress", "category" => "Dresses", "price" => "₹ 31,800", "seed" => 13],
-                ["name" => "Structured Trousers", "category" => "Bottoms", "price" => "₹ 15,499", "seed" => 14],
-                ["name" => "Burgundy Slink Cami", "category" => "Tops", "price" => "₹ 9,900", "seed" => 15],
+                ["name" => "Crimson Wraith", "category" => "Tops", "price" => "₹ 18,999", "seed" => 10],
+                ["name" => "Citrus Garden", "category" => "Jacket", "price" => "₹ 24,500", "seed" => 11],
+                ["name" => "Fuschia Banarasi Drape", "category" => "Bottoms", "price" => "₹ 12,200", "seed" => 12],
+                ["name" => "Golden hour heiress", "category" => "Dresses", "price" => "₹ 31,800", "seed" => 13],
+                ["name" => "Pastel power Jacquard set", "category" => "Bottoms", "price" => "₹ 15,499", "seed" => 14],
+                ["name" => "Whirlwind Serenade", "category" => "Tops", "price" => "₹ 9,900", "seed" => 15],
+            ];
+            // Map to local asset images (6 files)
+            $imageFiles = [
+                'C-W.webp',
+                'Peachy.webp',
+                'fbd.webp',
+                'fb-2.webp',
+                'ice.webp',
+                'whirl.webp',
+
             ];
 
             foreach ($products as $i => $product):
@@ -214,7 +188,7 @@ include __DIR__ . '/../../includes/header.php';
             <div class="group relative overflow-hidden animate-fade-in" style="animation-delay: <?php echo $i * 0.1; ?>s;">
                 <div class="product-card-img-wrapper overflow-hidden">
                     <img 
-                        src="https://picsum.photos/seed/<?php echo $product['seed']; ?>/400/533" 
+                        src="/inanna/public/assets/images/noplus/<?php echo $imageFiles[$i % count($imageFiles)]; ?>" 
                         alt="<?php echo $product['name']; ?>" 
                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
                     />
