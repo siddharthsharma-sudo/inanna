@@ -1,7 +1,7 @@
 <?php
 // admin/orders.php
 require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/../public/includes/db.php';
+require_once __DIR__ . '/../includes/db.php';
 require_admin();
 
 // filters (allow order id, customer email, status, date range)

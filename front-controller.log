@@ -1,9 +1,0 @@
-[2025-11-27 11:22:26] Computed projectUri='/inanna' (docRoot='C:\xampp\htdocs', projectRoot='C:\xampp\htdocs\inanna')
-[2025-11-27 11:22:26] Request: reqUri='/inanna/', relativePath='/index.php'
-[2025-11-27 11:22:26] 404 Not Found: candidate='' relativePath='/index.php' publicReal='C:\xampp\htdocs\inanna\public'
-[2025-11-27 11:22:28] Computed projectUri='/inanna' (docRoot='C:\xampp\htdocs', projectRoot='C:\xampp\htdocs\inanna')
-[2025-11-27 11:22:28] Request: reqUri='/inanna/', relativePath='/index.php'
-[2025-11-27 11:22:28] 404 Not Found: candidate='' relativePath='/index.php' publicReal='C:\xampp\htdocs\inanna\public'
-[2025-11-27 11:22:38] Computed projectUri='/inanna' (docRoot='C:\xampp\htdocs', projectRoot='C:\xampp\htdocs\inanna')
-[2025-11-27 11:22:38] Request: reqUri='/inanna/', relativePath='/index.php'
-[2025-11-27 11:22:38] 404 Not Found: candidate='' relativePath='/index.php' publicReal='C:\xampp\htdocs\inanna\public'

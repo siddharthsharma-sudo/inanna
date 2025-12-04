@@ -1,7 +1,7 @@
 <?php
 // admin/users.php
 require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/../public/includes/db.php';
+require_once __DIR__ . '/../includes/db.php';
 require_admin();
 
 // filters

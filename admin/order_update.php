@@ -1,7 +1,7 @@
 <?php
 // admin/order_update.php
 require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/../public/includes/db.php';
+require_once __DIR__ . '/../includes/db.php';
 require_admin();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

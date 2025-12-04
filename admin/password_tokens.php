@@ -3,7 +3,7 @@
 // Only for development — DO NOT keep enabled in production.
 
 require_once __DIR__ . '/auth.php';          // admin authentication
-require_once __DIR__ . '/../public/includes/db.php'; // adjust if needed
+require_once __DIR__ . '/../includes/db.php'; // adjust if needed
 
 require_admin();
 

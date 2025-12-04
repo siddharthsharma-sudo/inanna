@@ -1,7 +1,7 @@
 <?php
 // admin/dashboard.php
 require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/../public/includes/db.php';
+require_once __DIR__ . '/../includes/db.php';
 require_admin(); // only admin allowed
 
 $admin = current_admin_info($pdo);

@@ -1,7 +1,7 @@
 <?php
 // admin/order_view.php
 require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/../public/includes/db.php';
+require_once __DIR__ . '/../includes/db.php';
 require_admin();
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;

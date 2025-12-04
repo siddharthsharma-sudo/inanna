@@ -2,11 +2,11 @@
 // admin/products.php
 // Manage products list (Admin area)
 
-require_once __DIR__ . '/../public/includes/db.php'; // your working path
+require_once __DIR__ . '/../includes/db.php'; // your working path
 require_once __DIR__ . '/auth.php';
 require_admin();
 
-// simple CSRF for delete actions
+// start session and prepare CSRF token used by delete form
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (empty($_SESSION['crud_csrf'])) $_SESSION['crud_csrf'] = bin2hex(random_bytes(16));
 $csrf = $_SESSION['crud_csrf'];
@@ -27,7 +27,7 @@ try {
         $variantCounts[(int)$r['product_id']] = (int)$r['cnt'];
     }
 } catch (Exception $e) {
-    // table might not exist yet — ignore silently
+    // ignore if table not present
     $variantCounts = [];
 }
 ?>
@@ -75,6 +75,8 @@ try {
     <div class="alert alert-danger">Invalid request.</div>
   <?php elseif ($err === 'uploadfail'): ?>
     <div class="alert alert-danger">Image upload failed.</div>
+  <?php elseif ($err === 'db'): ?>
+    <div class="alert alert-danger">A server error occurred while deleting. Check logs.</div>
   <?php endif; ?>
 
   <div class="card shadow-sm">
@@ -99,7 +101,7 @@ try {
               <tr>
                 <td><?php echo (int)$p['id']; ?></td>
                 <td>
-                  <?php if (!empty($p['image']) && file_exists(__DIR__ . '/../public/' . $p['image'])): ?>
+                  <?php if (!empty($p['image']) && file_exists(__DIR__ . '/../' . $p['image'])): ?>
                     <img src="<?php echo '../' . htmlspecialchars($p['image']); ?>" class="thumb" alt="">
                   <?php else: ?>
                     <div style="height:50px;width:50px;background:#f0f0f0;border-radius:4px;"></div>
@@ -114,7 +116,8 @@ try {
                 <td>
                   <a href="product_edit.php?id=<?php echo $p['id']; ?>" class="btn btn-sm btn-primary">Edit</a>
 
-                  <form method="post" action="product_save.php" style="display:inline" onsubmit="return confirm('Delete this product?');">
+                  <form method="post" action="product_delete.php" style="display:inline" onsubmit="return confirm('Delete this product?');">
+
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="id" value="<?php echo $p['id']; ?>">
                     <input type="hidden" name="csrf" value="<?php echo htmlspecialchars($csrf); ?>">

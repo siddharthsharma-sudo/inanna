@@ -1,11 +1,11 @@
 <?php
-// test_mail.php (project root) — quick SMTP test using config inside public/includes/
-require_once __DIR__ . '/public/includes/config.php';
-$config = require __DIR__ . '/public/includes/config.php';
+// test_mail.php (project root) — quick SMTP test using config inside includes/
+require_once __DIR__ . '/includes/config.php';
+$config = require __DIR__ . '/includes/config.php';
 
-require_once __DIR__ . '/public/includes/PHPMailer/PHPMailer.php';
-require_once __DIR__ . '/public/includes/PHPMailer/SMTP.php';
-require_once __DIR__ . '/public/includes/PHPMailer/Exception.php';
+require_once __DIR__ . '/includes/PHPMailer/PHPMailer.php';
+require_once __DIR__ . '/includes/PHPMailer/SMTP.php';
+require_once __DIR__ . '/includes/PHPMailer/Exception.php';
 use PHPMailer\PHPMailer\PHPMailer;
 
 $mail = new PHPMailer(true);

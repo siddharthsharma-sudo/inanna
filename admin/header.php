@@ -31,7 +31,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
         <li class="nav-item"><a class="nav-link" href="users.php">Users</a></li>
       </ul>
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" href="../public/index.php" target="_blank">View Store</a></li>
+        <li class="nav-item"><a class="nav-link" href="../index.php" target="_blank">View Store</a></li>
         <li class="nav-item"><a class="nav-link text-danger" href="logout.php">Logout</a></li>
       </ul>
     </div>

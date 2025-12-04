@@ -8,7 +8,7 @@ if (!empty($_SESSION['admin_id'])) {
     exit;
 }
 
-require_once __DIR__ . '/../public/includes/db.php'; // provides $pdo
+require_once __DIR__ . '/../includes/db.php'; // provides $pdo
 
 $error = null;
 
@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
 
       <div class="text-center mt-3 small text-muted">
-        <a href="/inanna/public/index.php">Back to site</a>
+        <a href="index.php">Back to site</a>
       </div>
     </div>
   </div>
