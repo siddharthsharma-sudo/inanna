@@ -217,7 +217,7 @@ include __DIR__ . '/includes/header.php';
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0 page-title">Products</h2>
     <div>
-      <a href="index.php" class="btn btn-outline-light back-home">Home</a>
+      <a href="./" class="btn btn-outline-light back-home">Home</a>
     </div>
   </div>
 

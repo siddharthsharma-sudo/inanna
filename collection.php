@@ -98,29 +98,29 @@
 
 <div class="promo-container-3x">
     
-    <div class="promo-card-3x">
-        <img src="https://mld1qxcswytz.i.optimole.com/cb:G13G.df4/w:369/h:550/q:mauto/dpr:1.3/f:best/https://worldofinanna.org/wp-content/uploads/2025/08/IMG_5496_Original-scaled.webp" alt="NO PLUS ONE">
+    <a href="no-plus-one.php" class="promo-card-3x">
+        <img src="assets/images/no-plus-one.webp" alt="NO PLUS ONE">
 
         <div class="text-overlay-bottom">
             <h2 class="card-title-3x">NO PLUS ONE</h2>
         </div>
-    </div>
+</a>
 
-    <div class="promo-card-3x">
-        <img src="https://mld1qxcswytz.i.optimole.com/cb:G13G.df4/w:374/h:550/q:mauto/dpr:1.3/f:best/https://worldofinanna.org/wp-content/uploads/2025/09/cropped.jpg" alt="THE GUEST LIST">
+    <a href="the-guest-list.php" class="promo-card-3x">
+        <img src="assets/images/theguestlist2.webp" alt="THE GUEST LIST">
 
         <div class="text-overlay-bottom">
             <h2 class="card-title-3x">THE GUEST LIST</h2>
         </div>
-    </div>
+</a>
 
-    <div class="promo-card-3x">
-        <img src="https://mld1qxcswytz.i.optimole.com/cb:G13G.df4/rt:fill/w:249/h:550/q:mauto/dpr:2.0/f:best/https://worldofinanna.org/wp-content/uploads/2025/08/Pro-Capture-One-1209.jpg" alt="TILL SUNRISE">
+    <a href="till-sunrise.php" class="promo-card-3x">
+        <img src="assets/images/tillsunrise3.webp" alt="TILL SUNRISE">
 
         <div class="text-overlay-bottom">
             <h2 class="card-title-3x">TILL SUNRISE</h2>
         </div>
-    </div>
+</a>
 
 </div>
 

@@ -45,24 +45,30 @@ h1, h2, h3, h4, h5, h6, .display-1, .display-2, .display-3 { font-family: 'Cormo
 .main-navbar .navbar-brand img { filter: invert(1) brightness(200%); height:55px; }
 .main-navbar .mobile-hamburger .bi-list { color:#fff; }
 .main-navbar .cart-img { width:22px; height:36px; object-fit:contain; filter: invert(1) brightness(200%); transition: filter 300ms ease; }
-.main-navbar.scrolled { background: rgba(0,0,0,0.9) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 1rem 0; box-shadow: 0 10px 25px rgba(0,0,0,0.25); }
-.main-navbar.scrolled .nav-link { color:#fff !important; }
+.main-navbar.scrolled { background: #0e0e0e !important; }
 .custom-navbar { max-width:1424px; }
-
-/* small active link tweak */
 .nav-link.active { font-weight:600; color:#fff !important; }
+
+@media (min-width: 1024px) {
+  .main-navbar .navbar-brand { margin-left: 9rem !important; }
+}
+
+@media (max-width: 1023.98px) {
+  .main-navbar .navbar-brand { margin-left: 0 !important; }
+}
+
 
 /* ------------------------------------
    LOGO SCROLLING STYLES (REQUIRED FOR EFFECT)
 ------------------------------------ */
-.navbar-logo { height:55px; transform-origin:center center; will-change: transform; }
+.navbar-logo { height:55px; }
 
 @media (max-width: 480px){
     .main-navbar .navbar-brand img{
         height:40px;
       }
 
-    .navbar-logo { transform-origin:left; } 
+    
 
 }
 
@@ -89,6 +95,12 @@ h1, h2, h3, h4, h5, h6, .display-1, .display-2, .display-3 { font-family: 'Cormo
 }
 
 .fashion-hero-slider {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+}
+
+.fashion-hero-single {
     width: 100%;
     height: 100vh;
     position: relative;
@@ -207,6 +219,7 @@ h1, h2, h3, h4, h5, h6, .display-1, .display-2, .display-3 { font-family: 'Cormo
     .navbar-logo { height:44px; }
 
     .swiper { height: 100vh; }
+    .fashion-hero-single { height: 100vh; }
 
     .hero-title { font-size: clamp(28px, 9vw, 64px); }
     .hero-tagline { font-size: 0.8rem; }
@@ -226,6 +239,7 @@ h1, h2, h3, h4, h5, h6, .display-1, .display-2, .display-3 { font-family: 'Cormo
     .swiper-horizontal>.swiper-pagination-bullets, .swiper-pagination-bullets.swiper-pagination-horizontal, .swiper-pagination-custom, .swiper-pagination-fraction{
         left:81%;
     }
+    .fashion-content p { font-size: 6px; }
 }
 .hero-social { position: absolute; top: 80%; left: 22px; transform: translateY(-50%); z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 20px; }
 .hero-social-label { display: none; color: rgba(255,255,255,0.9); font-size: 12px; letter-spacing: 0.2em; writing-mode: vertical-rl; }
@@ -272,3 +286,5 @@ h1, h2, h3, h4, h5, h6, .display-1, .display-2, .display-3 { font-family: 'Cormo
   .hero-pagination .swiper-pagination-bullet { width: 38px; height: 2px; }
   .swiper .hero-pagination.swiper-pagination, .swiper-horizontal > .hero-pagination.swiper-pagination { bottom: 22px !important; }
 }
+.fashion-hero-single .hero-tagline { opacity: 1; }
+.fashion-hero-single .hero-title { opacity: 1; transform: none; }

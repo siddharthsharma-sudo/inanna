@@ -455,48 +455,32 @@ include __DIR__ . '/includes/header.php';
     /* =========================
        Video Banner
     ========================== */
-    .video-banner { margin-bottom: 100px; border-radius: 0; overflow: hidden; position: relative; background: radial-gradient(circle at top, #222 0, #050505 60%); min-height: 360px; display: flex; align-items: center; justify-content: center; }
+    .video-banner { margin-bottom: 100px; border-radius: 0; overflow: hidden; position: relative; background: radial-gradient(circle at top, #222 0, #050505 60%); min-height: 550px; display: flex; align-items: center; justify-content: center; }
+
+    .video-banner-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
 
     .video-banner-content {
+      position: relative;
       text-align: center;
-      z-index: 2;
+      z-index: 3;
+      color: #fff;
+      background: transparent;
+      backdrop-filter: none;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
     }
 
     .video-banner-title {
       font-family: "Playfair Display", serif;
-      font-size: clamp(24px, 4vw, 32px);
-      margin-bottom: 18px;
+      color: #fff;
+      font-size: clamp(20px, 3vw, 28px);
+      margin-bottom: 14px;
     }
 
-    .video-play-btn {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      border: 1px solid var(--pure-white);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      background: transparent;
-      transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
-    }
+    .video-banner .section-label { color: rgba(255,255,255,0.85); }
 
-    .video-play-btn:hover {
-      background: var(--pure-white);
-      color: #000;
-      transform: translateY(-1px);
-    }
-
-    .video-play-btn::before {
-      content: "";
-      width: 0;
-      height: 0;
-      border-left: 12px solid currentColor;
-      border-top: 8px solid transparent;
-      border-bottom: 8px solid transparent;
-      margin-left: 2px;
-    }
-
+    
     /* =========================
        Atelier Sticky Section
     ========================== */
@@ -1243,13 +1227,13 @@ include __DIR__ . '/includes/header.php';
             <div class="product-image"
                  style="background-image:url('assets/images/theguestlist/img-2.webp');"></div>
             <div class="product-image-secondary"
-                 style="background-image:url('assets/images/theguestlist/img-3.webp');"></div>
+                 style="background-image:url('assets/images/theguestlist/saree2.webp');"></div>
             <button class="product-quick-add" aria-label="Quick add">+</button>
           </div>
           <div class="product-info">
-            <div class="product-name">Midnight Column Dress</div>
+            <div class="product-name">Golden Hour Silk-Net Saree</div>
             <div class="product-meta">Evening · Dress</div>
-            <div class="product-price">₹18,900</div>
+            <div class="product-price">₹42,900</div>
           </div>
         </article>
 
@@ -1263,9 +1247,9 @@ include __DIR__ . '/includes/header.php';
             <button class="product-quick-add" aria-label="Quick add">+</button>
           </div>
           <div class="product-info">
-            <div class="product-name">Onyx Tailored Blazer</div>
-            <div class="product-meta">Structure · Jacket</div>
-            <div class="product-price">₹22,500</div>
+            <div class="product-name">Mandala Muse Cotton-Linen Set</div>
+            <div class="product-meta">Structure · Cord-Set</div>
+            <div class="product-price">₹45,985</div>
           </div>
         </article>
 
@@ -1273,15 +1257,15 @@ include __DIR__ . '/includes/header.php';
         <article class="product-card reveal">
           <div class="product-media">
             <div class="product-image"
-                 style="background-image:url('assets/images/theguestlist/img-6.webp');"></div>
-            <div class="product-image-secondary"
                  style="background-image:url('assets/images/theguestlist/img-1.webp');"></div>
+            <div class="product-image-secondary"
+                 style="background-image:url('assets/images/theguestlist/itgirl2.webp');"></div>
             <button class="product-quick-add" aria-label="Quick add">+</button>
           </div>
           <div class="product-info">
-            <div class="product-name">Veiled Spine Gown</div>
-            <div class="product-meta">Veil · Gown</div>
-            <div class="product-price">₹27,800</div>
+            <div class="product-name">The IT Girl</div>
+            <div class="product-meta">Veil · Cord-Set</div>
+            <div class="product-price">₹5000</div>
           </div>
         </article>
 
@@ -1291,13 +1275,13 @@ include __DIR__ . '/includes/header.php';
             <div class="product-image"
                  style="background-image:url('assets/images/theguestlist/img-3.webp');"></div>
             <div class="product-image-secondary"
-                 style="background-image:url('assets/images/theguestlist/img-4.webp');"></div>
+                 style="background-image:url('assets/images/theguestlist/throneplay2.webp');"></div>
             <button class="product-quick-add" aria-label="Quick add">+</button>
           </div>
           <div class="product-info">
-            <div class="product-name">Nocturne Satin Trousers</div>
+            <div class="product-name">Throneplay</div>
             <div class="product-meta">Evening · Tailored</div>
-            <div class="product-price">₹15,400</div>
+            <div class="product-price">₹75,320</div>
           </div>
         </article>
       </div>
@@ -1309,10 +1293,11 @@ include __DIR__ . '/includes/header.php';
          Video Banner
     ========================== -->
     <section class="video-banner">
+      <video class="video-banner-video" autoplay muted loop playsinline preload="none" src="assets/video/in-stitch.mp4"></video>
       <div class="video-banner-content reveal">
-        <div class="section-label">Motion Edit</div>
+        <div class="section-label"></div>
         <h2 class="video-banner-title">Movement in every stitch</h2>
-        <button class="video-play-btn" aria-label="Play lookbook film"></button>
+        
       </div>
     </section>
 
@@ -1419,9 +1404,9 @@ include __DIR__ . '/includes/header.php';
             <img src="assets/images/theguestlist/img-2.webp" alt="Palette">
           </div>
           <div class="style-body">
-            <div class="style-title">The Palette</div>
+            <div class="style-title">Golden Hour Silk-Net Saree</div>
             <p class="style-copy">
-              Blacks, charcoals, and barely-there off-whites — edited like a late-night playlist.
+              Luxe, effortless, and dramatic — crafted for the spotlight.
             </p>
           </div>
         </article>
@@ -1431,7 +1416,7 @@ include __DIR__ . '/includes/header.php';
             <img src="assets/images/theguestlist/img-3.webp" alt="The Night">
           </div>
           <div class="style-body">
-            <div class="style-title">The Night</div>
+            <div class="style-title">Throneplay</div>
             <p class="style-copy">
               Built for arrivals without exits. Fabrics that look better against streetlight.
             </p>
@@ -1456,8 +1441,8 @@ include __DIR__ . '/includes/header.php';
           <div class="hotspot-card-header">
             <div class="hotspot-card-thumb" style="background-image:url('assets/images/theguestlist/img-4.webp');"></div>
             <div>
-              <div class="hotspot-card-title">Structured Belt</div>
-              <div class="hotspot-card-price">₹9,500</div>
+              <div class="hotspot-card-title">Mandala Muse <br>Cotton-Linen Set</div>
+              <div class="hotspot-card-price">₹45,985</div>
             </div>
           </div>
           <button><a href="products.php">SHOP NOW</a></button>
@@ -1466,10 +1451,10 @@ include __DIR__ . '/includes/header.php';
         <div class="hotspot" data-hotspot="bag2" style="top: 66%; left: 22%;"><div class="hotspot-dot"></div></div>
         <div class="hotspot-card" id="hotspot-bag2" style="top: 70%; left: 26%;">
           <div class="hotspot-card-header">
-            <div class="hotspot-card-thumb" style="background-image:url('assets/images/theguestlist/img-6.webp');"></div>
+            <div class="hotspot-card-thumb" style="background-image:url('assets/images/theguestlist/itgirl2.webp');"></div>
             <div>
-              <div class="hotspot-card-title">Evening Bag</div>
-              <div class="hotspot-card-price">₹12,800</div>
+              <div class="hotspot-card-title">The It Girl</div>
+              <div class="hotspot-card-price">₹5,000</div>
             </div>
           </div>
           <button><a href="products.php">SHOP NOW</a></button>
@@ -1480,14 +1465,14 @@ include __DIR__ . '/includes/header.php';
           <div class="hotspot-card-header">
             <div class="hotspot-card-thumb" style="background-image:url('assets/images/theguestlist/img-3.webp');"></div>
             <div>
-              <div class="hotspot-card-title">Noir Stiletto</div>
-              <div class="hotspot-card-price">₹16,800</div>
+              <div class="hotspot-card-title">Throneplay</div>
+              <div class="hotspot-card-price">₹75,320</div>
             </div>
           </div>
           <button><a href="products.php">SHOP NOW</a></button>
         </div>
 
-        <div class="hotspot" data-hotspot="necklace2" style="top: 18%; left: 62%;"><div class="hotspot-dot"></div></div>
+        <!-- <div class="hotspot" data-hotspot="necklace2" style="top: 18%; left: 62%;"><div class="hotspot-dot"></div></div>
         <div class="hotspot-card" id="hotspot-necklace2" style="top: 22%; left: 66%;">
           <div class="hotspot-card-header">
             <div class="hotspot-card-thumb" style="background-image:url('assets/images/theguestlist/img-2.webp');"></div>
@@ -1497,15 +1482,15 @@ include __DIR__ . '/includes/header.php';
             </div>
           </div>
           <button><a href="products.php">SHOP NOW</a></button>
-        </div>
+        </div> -->
 
         <div class="hotspot" data-hotspot="cuff2" style="top: 48%; left: 74%;"><div class="hotspot-dot"></div></div>
         <div class="hotspot-card" id="hotspot-cuff2" style="top: 52%; left: 78%;">
           <div class="hotspot-card-header">
             <div class="hotspot-card-thumb" style="background-image:url('assets/images/theguestlist/img-5.webp');"></div>
             <div>
-              <div class="hotspot-card-title">Embroidered Cuff</div>
-              <div class="hotspot-card-price">₹5,900</div>
+              <div class="hotspot-card-title">Golden Hour <br>Silk-Net Saree</div>
+              <div class="hotspot-card-price">₹42,900</div>
             </div>
           </div>
           <button><a href="products.php">SHOP NOW</a></button>

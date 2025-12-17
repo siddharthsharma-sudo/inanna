@@ -384,21 +384,21 @@
     
     <div class="right-category-panel">
         
-        <a href="/category/dresses" class="vertical-category-card card-dresses" data-bg="url('https://mld1qxcswytz.i.optimole.com/cb:G13G.df4/w:auto/h:auto/q:mauto/f:best/https://worldofinanna.org/wp-content/uploads/2025/05/20250424_144510_164-scaled.jpg')">
+        <a href="products.php" class="vertical-category-card card-dresses" data-bg="url(assets/images/bare-essence1.jpeg)">
             <div class="card-content">
                 <h2 class="card-title">DRESSES</h2>
                 <span class="card-link">BROWSE ALL</span>
             </div>
         </a>
         
-        <a href="/category/resort-wear" class="vertical-category-card card-resort" data-bg="url('https://picsum.photos/id/102/1000/1600')">
+        <a href="products.php" class="vertical-category-card card-resort" data-bg="url(assets/images/bare-essence2.webp)">
             <div class="card-content">
                 <h2 class="card-title">RESORT WEAR</h2>
                 <span class="card-link">BROWSE ALL</span>
             </div>
         </a>
         
-        <a href="/category/the-twins" class="vertical-category-card card-twins" data-bg="url('https://picsum.photos/id/103/1000/1600')">
+        <a href="products.php" class="vertical-category-card card-twins" data-bg="url(assets/images/bare-essence3.webp)">
             <div class="card-content">
                 <h2 class="card-title">THE TWINS</h2>
                 <span class="card-link">BROWSE ALL</span>
@@ -441,5 +441,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   panel.addEventListener('mouseleave', function(){ setActive(null); });
+
+  if (cards.length) setActive(cards[0]);
 });
 </script>

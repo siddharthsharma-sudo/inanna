@@ -37,7 +37,7 @@ $order = $stmt->fetch(PDO::FETCH_ASSOC);
         <?php endif; ?>
 
         <a href="order_view.php" class="btn btn-primary mt-3">View My Orders</a>
-        <a href="index.php" class="btn btn-outline-secondary mt-3">Continue Shopping</a>
+        <a href="./" class="btn btn-outline-secondary mt-3">Continue Shopping</a>
     </div>
 </div>
 

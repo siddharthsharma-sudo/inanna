@@ -194,21 +194,21 @@ include __DIR__ . '/includes/header.php';
         <div class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             <?php
             $products = [
-                ["name" => "Crimson Wraith", "category" => "Co-ord Set", "price" => "₹ 18,999", "seed" => 10],
-                ["name" => "Citrus Garden", "category" => "Suit", "price" => "₹ 24,500", "seed" => 11],
-                ["name" => "Fuschia Banarasi Drape", "category" => "Co-ord Set", "price" => "₹ 12,200", "seed" => 12],
-                ["name" => "Golden hour heiress", "category" => "Dresses", "price" => "₹ 31,800", "seed" => 13],
-                ["name" => "Pastel power Jacquard set", "category" => "Dress", "price" => "₹ 15,499", "seed" => 14],
-                ["name" => "Whirlwind Serenade", "category" => "Dress", "price" => "₹ 9,900", "seed" => 15],
+                ["name" => "Crimson Wraith", "category" => "Co-ord Set", "price" => "₹ 3000", "seed" => 10],
+                ["name" => "Golden hour heiress", "category" => "Dress", "price" => "₹ 26,665", "seed" => 11],
+                ["name" => "Citrus Garden", "category" => "Dress", "price" => "₹ 4000", "seed" => 12],
+                ["name" => "Fuschia Banarasi Drape", "category" => "Dresses", "price" => "₹ 4000", "seed" => 13],
+                ["name" => "Pastel power Jacquard set", "category" => "Dress", "price" => "₹ 8,900", "seed" => 14],
+                ["name" => "After Midnight Sheer Shirt", "category" => "Shirt", "price" => "₹ 8,200", "seed" => 15],
             ];
             // Map to local asset images (6 files)
             $imageFiles = [
                 'img1.webp',
                 'img2.webp',
-                'img3.webp',
+                'Peachy.webp',
                 'img4.webp',
                 'img5.webp',
-                'img6.webp',
+                'shirt.webp',
 
             ];
 
@@ -255,9 +255,9 @@ include __DIR__ . '/includes/header.php';
     <div class="spotlight-meta">
       <div class="section-label">Product spotlight</div>
 
-      <h2 class="spotlight-name">Golden Hour Silk-Net Saree</h2>
+      <h2 class="spotlight-name">Golden hour heiress</h2>
 
-      <div class="spotlight-price">₹42,900</div>
+      <div class="spotlight-price">₹ 26,665.00</div>
 
       <p class="spotlight-desc">
         A pre-draped silk-net saree drenched in golden hand and machine embroidery, paired with a halter-style blouse. Luxe, effortless, and dramatic — crafted for the spotlight.
@@ -512,8 +512,8 @@ include __DIR__ . '/includes/header.php';
         <div class="hotspot-card-header">
           <div class="hotspot-card-thumb" style="background-image:url('assets/images/noplus/img1.webp');"></div>
           <div>
-            <div class="hotspot-card-title">Structured Belt</div>
-            <div class="hotspot-card-price">₹9,500</div>
+            <div class="hotspot-card-title">Crimson Wraith</div>
+            <div class="hotspot-card-price">₹3000</div>
           </div>
         </div>
         <button>Add to bag</button>
@@ -528,8 +528,8 @@ include __DIR__ . '/includes/header.php';
         <div class="hotspot-card-header">
           <div class="hotspot-card-thumb" style="background-image:url('assets/images/noplus/img2.webp');"></div>
           <div>
-            <div class="hotspot-card-title">Evening Bag</div>
-            <div class="hotspot-card-price">₹12,800</div>
+            <div class="hotspot-card-title">Golden hour heiress</div>
+            <div class="hotspot-card-price">₹26,665</div>
           </div>
         </div>
         <button>Add to bag</button>
@@ -542,10 +542,10 @@ include __DIR__ . '/includes/header.php';
 
       <div class="hotspot-card" id="hotspot-heels" style="top: 68%; left: 60%;">
         <div class="hotspot-card-header">
-          <div class="hotspot-card-thumb" style="background-image:url('assets/images/noplus/img3.webp');"></div>
+          <div class="hotspot-card-thumb" style="background-image:url('assets/images/noplus/img6.webp');"></div>
           <div>
-            <div class="hotspot-card-title">Noir Stiletto</div>
-            <div class="hotspot-card-price">₹16,800</div>
+            <div class="hotspot-card-title">Citrus Garden</div>
+            <div class="hotspot-card-price">₹ 4000</div>
           </div>
         </div>
         <button>Add to bag</button>
@@ -560,8 +560,8 @@ include __DIR__ . '/includes/header.php';
         <div class="hotspot-card-header">
           <div class="hotspot-card-thumb" style="background-image:url('assets/images/noplus/img4.webp');"></div>
           <div>
-            <div class="hotspot-card-title">Statement Necklace</div>
-            <div class="hotspot-card-price">₹7,200</div>
+            <div class="hotspot-card-title">Fuschia Banarasi Drape</div>
+            <div class="hotspot-card-price">₹4000</div>
           </div>
         </div>
         <button>Add to bag</button>

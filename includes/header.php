@@ -101,6 +101,8 @@ function isActive($filename) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="icon" href="assets/images/footer_logo.webp">
     
@@ -113,7 +115,7 @@ function isActive($filename) {
     </div>
 
     <div class="sidebar-links">
-        <a href="index.php">Home</a>
+        <a href="./">Home</a>
         <a href="woi.php">WOI</a>
         <a href="appointment.php">Appointment</a>
         <a href="products.php">Shop</a>
@@ -156,7 +158,7 @@ function isActive($filename) {
     <div class="container custom-navbar d-flex align-items-center justify-content-between">
 
         <ul class="navbar-nav gap-lg-4 desktop-links">
-            <li class="nav-item"><a class="nav-link<?= isActive('index.php') ?>" href="index.php">Home</a></li>
+            <li class="nav-item"><a class="nav-link<?= isActive('index.php') ?>" href="./">Home</a></li>
             <li class="nav-item"><a class="nav-link<?= isActive('woi.php') ?>" href="woi.php">WOI</a></li>
             <li class="nav-item"><a class="nav-link<?= isActive('appointment.php') ?>" href="appointment.php">Appointment</a></li>
             <li class="nav-item"><a class="nav-link<?= isActive('products.php') ?>" href="products.php">Shop</a></li>
@@ -298,41 +300,19 @@ function closeSidebar() {
 </script>
 
 <script>
-// === SIMPLE NAVBAR LOGO SCROLL ANIMATION ===
 (function(){
   var nav = document.getElementById('mainNav');
-  var logo = document.getElementById('navLogo');
-  var ticking = false;
-  var path = window.location.pathname.split('/').pop(); 
-var isHome = (path === '' || path === '');
-
-  function applyTransform(y){
-    if (!logo) return;
-    if (!isHome) { logo.style.transform = 'scale(1) translateY(0)'; return; }
-    var p = Math.min(Math.max(y / 150, 0), 1);
-    var scale = 2.8 + (1 - 2.8) * p;
-    var ty = 40 + (0 - 40) * p;
-    logo.style.transform = 'scale(' + scale + ') translateY(' + ty + 'px)';
-  }
-
+  if (!nav) return;
   function update(){
     var y = window.scrollY || 0;
-    applyTransform(y);
-    if (y > 50) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
-    ticking = false;
+    if (y > 10) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
   }
-
-  function onScroll(){
-    if (!ticking) { requestAnimationFrame(update); ticking = true; }
-  }
-
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('load', function(){ update(); });
-  window.addEventListener('resize', function(){ update(); });
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('load', update);
+  window.addEventListener('resize', update);
   update();
 })();
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // (Your custom Bootstrap dropdown fallback logic remains here)
@@ -407,3 +387,30 @@ var isHome = (path === '' || path === '');
  });
 })();
 </script>
+<!-- <script>
+(function(){
+  function blockKeys(e){
+    var k = (e.key || '').toLowerCase();
+
+    // Block only CTRL + U
+    var isCtrlU = e.ctrlKey && k === 'u';
+
+    // Block other dev tools shortcuts except Ctrl+Shift+I
+    var isDevTools =
+      (e.ctrlKey && e.shiftKey && (k === 'c' || k === 'j' || k === 'k')) ||
+      e.keyCode === 123; // F12
+
+    if (isCtrlU || isDevTools) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+
+  document.addEventListener('keydown', blockKeys, { capture: true });
+
+  document.addEventListener('contextmenu', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+  }, { capture: true });
+})();
+</script> -->

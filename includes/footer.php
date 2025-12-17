@@ -10,7 +10,7 @@
             <div class="footer-column">
                 <h3 class="column-title">About</h3>
                 <ul class="link-list">
-                    <li><a href="index.php">Home</a></li>
+                    <li><a href="./">Home</a></li>
                     <li><a href="woi.php">WOI</a></li>
                     <li><a href="appointment.php">Appointment</a></li>
                     <li><a href="products.php">Shop</a></li>

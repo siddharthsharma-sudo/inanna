@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
 
       <div class="text-center mt-3 small text-muted">
-        <a href="index.php">Back to site</a>
+        <a href="./">Back to site</a>
       </div>
     </div>
   </div>

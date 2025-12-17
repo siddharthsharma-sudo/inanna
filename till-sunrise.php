@@ -778,7 +778,7 @@ include __DIR__ . '/includes/header.php';
                 ["name" => "Isle of petal", "category" => "Co-ord Set", "price" => "₹4,000.00", "seed" => 12],
                
                 ["name" => "The Perisian Floral Co-ord Set", "category" => "Dress", "price" => "₹3,000.00", "seed" => 14],
-                ["name" => "Tidal Romance Co-ord", "category" => "Dress", "price" => "₹7,319.00", "seed" => 15],
+                ["name" => "Dark Star Co-ord Set", "category" => "Dress", "price" => "₹40,000.00", "seed" => 15],
             ];
             // Map to local asset images (6 files)
             $imageFiles = [
@@ -902,7 +902,7 @@ include __DIR__ . '/includes/header.php';
     <div class="spotlight-meta">
       <div class="section-label">Product spotlight</div>
 
-      <h2 class="spotlight-name">Tidal Romance Co-ord </h2>
+      <h2 class="spotlight-name">Tidal Romance Co-ord-Set</h2>
 
       <div class="spotlight-price">₹7,319.00</div>
 
@@ -971,10 +971,10 @@ include __DIR__ . '/includes/header.php';
 
     <div class="hotspot-card" id="hotspot-belt" style="top: 36%; left: 32%;">
       <div class="hotspot-card-header">
-        <div class="hotspot-card-thumb" style="background-image:url('assets/images/till-sunrise/img1.avif');"></div>
+        <div class="hotspot-card-thumb" style="background-image:url(assets/images/till-sunrise/img6.webp);"></div>
         <div>
-          <div class="hotspot-card-title">Structured Belt</div>
-          <div class="hotspot-card-price">₹9,500</div>
+          <div class="hotspot-card-title">Isle of Petal</div>
+          <div class="hotspot-card-price">₹4000</div>
         </div>
       </div>
       <a href="/products.php">Add to bag</a>
@@ -987,10 +987,10 @@ include __DIR__ . '/includes/header.php';
 
     <div class="hotspot-card" id="hotspot-heels" style="top: 64%; left: 66%;">
       <div class="hotspot-card-header">
-        <div class="hotspot-card-thumb" style="background-image:url('assets/images/till-sunrise/img3.webp');"></div>
+        <div class="hotspot-card-thumb" style="background-image:url(assets/images/till-sunrise/img3.webp);"></div>
         <div>
-          <div class="hotspot-card-title">Embrace</div>
-          <div class="hotspot-card-price">₹3,500</div>
+          <div class="hotspot-card-title">Lunar Lines <br> Split Set</div>
+          <div class="hotspot-card-price">₹8,319</div>
         </div>
       </div>
      <a href="/products.php">Add to bag</a>
@@ -998,16 +998,16 @@ include __DIR__ . '/includes/header.php';
 
     <!--  HOTSPOT 3 -->
 
-     <div class="hotspot" data-hotspot="heels" style="top: 30%; left: 62%;">
+     <div class="hotspot" data-hotspot="heels" style="top: 30%; left: 6%;">
       <div class="hotspot-dot"></div>
     </div>
 
     <div class="hotspot-card" id="hotspot-heels" style="top: 60%; left: 43%;">
       <div class="hotspot-card-header">
-        <div class="hotspot-card-thumb" style="background-image:url('assets/images/till-sunrise/img4.webp');"></div>
+        <div class="hotspot-card-thumb" style="background-image:url(assets/images/till-sunrise/img4.webp);"></div>
         <div>
-          <div class="hotspot-card-title">Isle Of Petal</div>
-          <div class="hotspot-card-price">₹4,000</div>
+          <div class="hotspot-card-title">Dark Star Co-ord Set</div>
+          <div class="hotspot-card-price">₹40,000</div>
         </div>
       </div>
       <a href="/products.php">Add to bag</a>
@@ -1166,7 +1166,8 @@ include __DIR__ . '/includes/header.php';
     right: 4%;
     left: auto !important;
   }
-}
+}   
+
 </style>
 
 <!-- =========================
@@ -1209,4 +1210,5 @@ if (shopLook) {
 
  <?php include __DIR__ . '/includes/footer.php';?>
 </body>
-</html>
+</html>      
+

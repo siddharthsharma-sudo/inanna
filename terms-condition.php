@@ -85,8 +85,8 @@
 
     <section>
       <h2>Introduction</h2>
-      <p>These Website Standard Terms and Conditions written on this webpage shall manage your use of our website, ReyTheme accessible at www.reytheme.com.</p>
-      <p>These Terms will be applied fully and affect your use of this Website. By using this Website, you agree to accept all terms and conditions written here. You must not use this Website if you disagree with any of these Website Standard Terms and Conditions.</p>
+      <p>
+       By using this Website, you agree to accept all terms and conditions written here. You must not use this Website if you disagree with any of these Website Standard Terms and Conditions.</p>
       <p>Minors or people below 18 years old are not allowed to use this Website.</p>
     </section>
 
@@ -163,7 +163,7 @@
       <p>These Terms are governed by the laws of the State of us. You submit to the non-exclusive jurisdiction of state and federal courts located in us.</p>
     </section>
 
-    <a class="button" href="index.php">Back to Home</a>
+    <a class="button" href="./">Back to Home</a>
 
   </main>
 </div>

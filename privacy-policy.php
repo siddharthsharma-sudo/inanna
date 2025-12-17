@@ -32,7 +32,7 @@
 
       <section aria-labelledby="who-we-are">
         <h2 id="who-we-are">Who we are</h2>
-        <p>Our website address is: <a href="index.php" target="_blank" rel="noopener">https://www.worldofinanna.org</a></p>
+        <p>Our website address is: <a href="./" target="_blank" rel="noopener">https://www.worldofinanna.org</a></p>
       </section>
 
       <section aria-labelledby="intro">
@@ -73,7 +73,7 @@
 
       <p class="muted" style="margin-top:18px">Thank you for trusting INANNA with your personal information. We appreciate your support and look forward to serving you.</p>
 
-      <a class="button" href="index.php" target="_blank" rel="noopener">Back to Home</a>
+      <a class="button" href="./" target="_blank" rel="noopener">Back to Home</a>
 
       <footer>
         <p>Last updated: <span id="last-updated">December 6, 2025</span></p>
