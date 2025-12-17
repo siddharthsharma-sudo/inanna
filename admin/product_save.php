@@ -278,27 +278,66 @@ try {
     }
 
     $hasProductImagesTable = false;
-    try {
-        $hasProductImagesTable = (bool)$pdo->query("SHOW TABLES LIKE 'product_images'")->fetchColumn();
-    } catch (Exception $e) { $hasProductImagesTable = false; }
+try {
+    $hasProductImagesTable = (bool)$pdo->query("SHOW TABLES LIKE 'product_images'")->fetchColumn();
+} catch (Exception $e) { $hasProductImagesTable = false; }
 
-    if ($hasProductImagesTable && !empty($newGalleryPaths)) {
-        $ins = $pdo->prepare("INSERT INTO product_images (product_id, path) VALUES (:pid, :path)");
-        foreach ($newGalleryPaths as $p) $ins->execute(['pid'=>$id, 'path'=>$p]);
-    } else {
-        if (array_key_exists('gallery',$productCols) && !empty($newGalleryPaths)) {
-            $cur = $pdo->prepare("SELECT gallery FROM products WHERE id = :id LIMIT 1");
-            $cur->execute(['id'=>$id]);
-            $row = $cur->fetch(PDO::FETCH_ASSOC);
-            $existing = [];
-            if (!empty($row['gallery'])) {
-                $dec = json_decode($row['gallery'], true);
-                if (is_array($dec)) $existing = $dec;
-                else $existing = array_filter(array_map('trim', explode(',', $row['gallery'])));
-            }
-            $merged = array_values(array_merge($existing, $newGalleryPaths));
-            $payload['gallery'] = json_encode($merged);
-        }
+if ($hasProductImagesTable && !empty($newGalleryPaths)) {
+    $ins = $pdo->prepare("INSERT INTO product_images (product_id, path) VALUES (:pid, :path)");
+    foreach ($newGalleryPaths as $p) $ins->execute(['pid'=>$id, 'path'=>$p]);
+} else {
+        // ---- GALLERY SAVE (ALWAYS REWRITE) ----
+// ===== FINAL GALLERY SAVE (SINGLE SOURCE OF TRUTH) =====
+$keepGallery = $_POST['existing_gallery_keep'] ?? [];
+$newGalleryPaths = $newGalleryPaths ?? [];
+
+$finalGallery = array_values(array_filter(array_merge(
+    is_array($keepGallery) ? $keepGallery : [],
+    is_array($newGalleryPaths) ? $newGalleryPaths : []
+)));
+
+if (array_key_exists('gallery', $productCols)) {
+    $payload['gallery'] = json_encode($finalGallery);
+}
+// --------------------------------------------------
+// DELETE REMOVED GALLERY FILES FROM DISK
+// --------------------------------------------------
+
+$oldGallery = [];
+
+// get previous gallery from DB
+$prev = $pdo->prepare("SELECT gallery FROM products WHERE id = :id");
+$prev->execute(['id' => $id]);
+$prevRow = $prev->fetch(PDO::FETCH_ASSOC);
+
+if (!empty($prevRow['gallery'])) {
+    $decoded = json_decode($prevRow['gallery'], true);
+    if (is_array($decoded)) {
+        $oldGallery = $decoded;
+    }
+}
+
+// normalize paths
+$oldGallery = array_map(function($p){
+    return ltrim($p, '/');
+}, $oldGallery);
+
+$finalGalleryClean = array_map(function($p){
+    return ltrim($p, '/');
+}, $finalGallery);
+
+// files to delete = old − new
+$toDelete = array_diff($oldGallery, $finalGalleryClean);
+
+// delete files
+foreach ($toDelete as $file) {
+    $fullPath = dirname(__DIR__) . '/' . $file;
+    if (is_file($fullPath)) {
+        @unlink($fullPath);
+    }
+}
+
+
     }
 
     if (!empty($payload)) {

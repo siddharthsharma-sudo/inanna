@@ -258,17 +258,19 @@ $categoriesToShow = !empty($categories) ? array_map(function($c){ return ['id'=>
             <div class="form-text small-note">Use product-level stock if you don't use variants.</div>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">Main Image (optional)</label>
-            <input type="file" name="main_image" accept="image/*" class="form-control">
-            <div class="form-text small-note">This will be the primary image shown on listings.</div>
-            <?php if (!empty($product['image']) && file_exists(__DIR__ . '/../' . ltrim($product['image'],'/'))): ?>
-              <div class="mt-2">
-                <img src="<?php echo h('../' . ltrim($product['image'],'/')); ?>" style="height:90px; object-fit:cover;" alt="">
-                <div class="form-text">Uploading a new main image replaces the old one.</div>
-              </div>
-            <?php endif; ?>
-          </div>
+         <div class="mb-3">
+  <label class="form-label">Main Image (optional)</label>
+  <input type="file" id="main-image-input" name="main_image" accept="image/*" class="form-control">
+  <div id="main-image-preview" class="mt-2"></div>
+
+  <?php if (!empty($product['image']) && file_exists(__DIR__ . '/../' . ltrim($product['image'],'/'))): ?>
+    <div class="mt-2 existing-image">
+      <img src="<?php echo h('../' . ltrim($product['image'],'/')); ?>" class="thumb">
+      <button type="button" class="btn btn-sm btn-danger mt-1 remove-existing">Delete</button>
+    </div>
+  <?php endif; ?>
+</div>
+
 
           <!-- Custom size toggle -->
           <div class="mb-3">
@@ -335,36 +337,71 @@ $categoriesToShow = !empty($categories) ? array_map(function($c){ return ['id'=>
       <hr>
 
       <!-- Gallery upload + existing images -->
-      <div class="mb-3">
-        <label class="form-label">Additional Gallery Images</label>
-        <input type="file" name="product_images[]" accept="image/*" class="form-control" multiple>
-        <div class="form-text small-note mt-1">Upload multiple images to showcase the product (angles, closeups). Existing images listed below with keep/delete options.</div>
+   <div class="mb-3">
+  <label class="form-label">Additional Gallery Images</label>
+  <input type="file" id="gallery-input" name="product_images[]" accept="image/*" class="form-control" multiple>
 
-        <?php if (!empty($product_images)): ?>
-          <div class="mt-2 gallery-wrap">
-            <?php foreach ($product_images as $pi):
-              $imgPath = __DIR__ . '/../' . ltrim($pi['path'],'/');
-              $src = '../' . ltrim($pi['path'],'/');
-              $imgId = (int)$pi['id'];
-            ?>
-              <div style="text-align:center;">
-                <?php if (file_exists($imgPath)): ?>
-                  <img src="<?php echo h($src); ?>" class="thumb" alt="">
-                <?php else: ?>
-                  <div class="thumb" style="display:flex;align-items:center;justify-content:center;background:#f5f5f5">No file</div>
-                <?php endif; ?>
-                <div class="form-check mt-1">
-                  <input class="form-check-input" type="checkbox" name="existing_product_images_keep[]" value="<?php echo $imgId; ?>" id="keep_img_<?php echo $imgId; ?>" checked>
-                  <label class="form-check-label small-note" for="keep_img_<?php echo $imgId; ?>">Keep</label>
-                </div>
-                <div class="small-note">ID: <?php echo $imgId; ?></div>
-                <input type="hidden" name="existing_product_images_ids[]" value="<?php echo $imgId; ?>">
-              </div>
-            <?php endforeach; ?>
-          </div>
-        <?php endif; ?>
+  <div id="gallery-preview" class="gallery-wrap mt-2"></div>
+<?php
+$gallery = [];
+
+if (!empty($product['gallery'])) {
+    $decoded = json_decode($product['gallery'], true);
+
+    if (is_array($decoded)) {
+        $gallery = $decoded;
+    } else {
+        // fallback if stored as comma-separated
+        $gallery = array_filter(
+            array_map('trim', explode(',', $product['gallery']))
+        );
+    }
+}
+?>
+<?php if (!empty($gallery)): ?>
+  <div class="gallery-wrap mt-2">
+    <?php foreach ($gallery as $index => $img): ?>
+      <div class="image-box text-center existing-gallery-image">
+        <img src="<?php echo h('../' . ltrim($img, '/')); ?>" class="thumb">
+
+        <!-- delete button -->
+        <button type="button" class="btn btn-sm btn-danger remove-gallery">✕</button>
+
+        <!-- KEEP checkbox (checked by default) -->
+        <input
+          type="checkbox"
+          name="existing_gallery_keep[]"
+          value="<?php echo h($img); ?>"
+          checked
+          hidden
+        >
       </div>
+    <?php endforeach; ?>
+  </div>
+<?php endif; ?>
 
+</div>
+<style>
+.image-box {
+  position: relative;
+  display: inline-block;
+}
+
+.image-box img {
+  display: block;
+}
+
+.image-box .remove-existing {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 10;              /* 🔥 THIS WAS MISSING */
+}
+
+.image-box {
+  z-index: 1;
+}
+</style>
       <hr>
 
       <!-- Variants block (unchanged logic from your previous file) -->
@@ -610,5 +647,87 @@ $categoriesToShow = !empty($categories) ? array_map(function($c){ return ['id'=>
 
 })();
 </script>
+<script>
+/* ---------- IMAGE PREVIEW + DELETE ---------- */
+
+function createPreview(file, onRemove) {
+  const box = document.createElement('div');
+  box.className = 'image-box';
+
+  const img = document.createElement('img');
+  img.className = 'thumb';
+  img.src = URL.createObjectURL(file);
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'btn btn-sm btn-danger';
+  btn.textContent = '✕';
+
+  btn.onclick = () => {
+    URL.revokeObjectURL(img.src);
+    box.remove();
+    onRemove();
+  };
+
+  box.appendChild(img);
+  box.appendChild(btn);
+  return box;
+}
+
+/* ---------- MAIN IMAGE ---------- */
+const mainInput = document.getElementById('main-image-input');
+const mainPreview = document.getElementById('main-image-preview');
+
+if (mainInput) {
+  mainInput.addEventListener('change', () => {
+    mainPreview.innerHTML = '';
+    if (mainInput.files[0]) {
+      const file = mainInput.files[0];
+      const preview = createPreview(file, () => {
+        mainInput.value = '';
+      });
+      mainPreview.appendChild(preview);
+    }
+  });
+}
+
+/* ---------- GALLERY IMAGES ---------- */
+const galleryInput = document.getElementById('gallery-input');
+const galleryPreview = document.getElementById('gallery-preview');
+
+if (galleryInput) {
+  galleryInput.addEventListener('change', () => {
+    galleryPreview.innerHTML = '';
+    const files = Array.from(galleryInput.files);
+    const dataTransfer = new DataTransfer();
+
+    files.forEach(file => {
+      dataTransfer.items.add(file);
+      const preview = createPreview(file, () => {
+        const remaining = Array.from(dataTransfer.items)
+          .filter(i => i.getAsFile() !== file);
+        dataTransfer.items.clear();
+        remaining.forEach(i => dataTransfer.items.add(i.getAsFile()));
+        galleryInput.files = dataTransfer.files;
+      });
+      galleryPreview.appendChild(preview);
+    });
+
+    galleryInput.files = dataTransfer.files;
+  });
+}
+/* ---------- EXISTING IMAGE DELETE ---------- */
+document.addEventListener('click', function (e) {
+  if (e.target.classList.contains('remove-gallery')) {
+    const box = e.target.closest('.existing-gallery-image');
+    const checkbox = box.querySelector('input[type="checkbox"]');
+
+    if (checkbox) checkbox.checked = false; // mark for delete
+    box.style.opacity = '0.4';
+    e.target.remove(); // optional: remove button
+  }
+});
+</script>
+
 </body>
 </html>

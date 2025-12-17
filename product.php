@@ -74,56 +74,35 @@ $variants = $vstmt->fetchAll(PDO::FETCH_ASSOC);
 
 // --- gather gallery images from multiple places ---
 // 1) product_images table
+// --------------------------------------------------
+// FINAL GALLERY SOURCE (DB ONLY — NO FILE SCANNING)
+// --------------------------------------------------
+
 $product_images = [];
-try {
-    $tbl = $pdo->query("SHOW TABLES LIKE 'product_images'")->fetchColumn();
-    if ($tbl) {
-        $gq = $pdo->prepare("SELECT path FROM product_images WHERE product_id = :pid ORDER BY id ASC");
-        $gq->execute(['pid'=>$id]);
-        while ($r = $gq->fetch(PDO::FETCH_ASSOC)) $product_images[] = $r['path'];
-    }
-} catch (Exception $e) { /* ignore */ }
 
-// 2) products.gallery column (JSON or CSV)
+/* main image */
+if (!empty($product['image'])) {
+    $product_images[] = '/' . ltrim($product['image'], '/');
+}
+
+/* additional gallery images (JSON only) */
 if ($has_gallery_col && !empty($product['gallery'])) {
-    $dec = json_decode($product['gallery'], true);
-    if (is_array($dec)) $product_images = array_merge($product_images, $dec);
-    else $product_images = array_merge($product_images, array_filter(array_map('trim', explode(',',$product['gallery']))));
-}
-
-// 3) product.image (primary)
-if (!empty($product['image'])) $product_images[] = $product['image'];
-
-// 4) uploads/products/{id}/gallery AND uploads/products/{id} and project-root uploads
-$dirsToTry = [
-    __DIR__ . "/uploads/products/{$id}/gallery",
-    __DIR__ . "/uploads/products/{$id}",
-    // parent dir variants (in case product.php is in public/ and uploads at project root)
-    dirname(__DIR__) . "/uploads/products/{$id}/gallery",
-    dirname(__DIR__) . "/uploads/products/{$id}",
-    // two levels up (just in case)
-    dirname(dirname(__DIR__)) . "/uploads/products/{$id}/gallery",
-    dirname(dirname(__DIR__)) . "/uploads/products/{$id}",
-];
-if (!empty($_SERVER['DOCUMENT_ROOT'])) {
-    $dirsToTry[] = rtrim($_SERVER['DOCUMENT_ROOT'], '/') . "/uploads/products/{$id}/gallery";
-    $dirsToTry[] = rtrim($_SERVER['DOCUMENT_ROOT'], '/') . "/uploads/products/{$id}";
-}
-$foundFiles = [];
-foreach ($dirsToTry as $uploadsGalleryDir) {
-    if (!is_dir($uploadsGalleryDir)) continue;
-    $files = array_values(array_filter(glob($uploadsGalleryDir . '/*'), 'is_file'));
-    foreach ($files as $f) {
-        $basename = basename($f);
-        if (strpos(str_replace('\\','/',$uploadsGalleryDir), "/uploads/products/{$id}/gallery") !== false) {
-            $url = ($webBase ? $webBase : '') . '/uploads/products/' . $id . '/gallery/' . $basename;
-        } else {
-            $url = ($webBase ? $webBase : '') . '/uploads/products/' . $id . '/' . $basename;
+    $decoded = json_decode($product['gallery'], true);
+    if (is_array($decoded)) {
+        foreach ($decoded as $img) {
+            $product_images[] = '/' . ltrim($img, '/');
         }
-        if (!in_array($url, $foundFiles, true)) $foundFiles[] = $url;
     }
 }
-foreach ($foundFiles as $u) $product_images[] = $u;
+
+/* de-duplicate */
+$product_images = array_values(array_unique($product_images));
+
+/* resolved images = final gallery */
+$resolved_product_images = $product_images;
+
+/* variants still stay as-is */
+
 
 // 5) add variant images too (primary + any images list)
 foreach ($variants as $vv) {
