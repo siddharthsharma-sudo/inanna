@@ -277,7 +277,7 @@ include __DIR__ . '/includes/header.php';
               <div class="product-overlay">
                 <div>
                   <strong>₹<?php echo number_format($p['price'], 2); ?></strong>
-                  <div class="small">Stock: <?php echo (int)$p['stock']; ?></div>
+                  <!-- <div class="small">Stock: <?php echo (int)$p['stock']; ?></div> -->
                 </div>
 
                 <div>

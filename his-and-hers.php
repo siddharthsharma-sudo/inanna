@@ -1,5 +1,5 @@
 <?php
-$page_title = 'His & Hers | World Of Inanna';
+$page_title = 'HIS & HERS - Wedding Guest Wardrobe by INANA';
 include __DIR__ . '/includes/header.php';
 ?>
 
@@ -10,12 +10,14 @@ include __DIR__ . '/includes/header.php';
     /* --------------------------------------
     FONTS & BASE LAYOUT
     -------------------------------------- */
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@200;300;400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@200;300;400;500&family=Great+Vibes&display=swap');
 
-    .collab-page-wrapper {
-        background-color: #fff;
+    body, html, .collab-page-wrapper {
+        background-color: #faf8f0 !important;
         color: #000;
         font-family: 'Montserrat', sans-serif;
+        margin: 0;
+        padding: 0;
         overflow-x: hidden;
     }
 
@@ -28,33 +30,10 @@ include __DIR__ . '/includes/header.php';
         height: 100vh;
         display: flex;
         flex-direction: column;
-        justify-content: flex-start; /* Move content to top */
+        justify-content: center;
         align-items: center;
-        text-align: center;
         color: #fff;
         overflow: hidden;
-    }
-
-    .collab-hero-content {
-        position: relative;
-        z-index: 3;
-        width: 100%;
-        padding-top: 100px; /* Offset from top */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .collab-hero-title-overlay {
-        font-family: 'Cormorant Garamond', serif;
-        font-size: clamp(3rem, 10vw, 8rem);
-        text-transform: uppercase;
-        margin: 0;
-        font-weight: 300;
-        line-height: 1;
-        letter-spacing: 0.1em;
-        color: #fff;
-        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
     }
 
     .collab-hero-bg {
@@ -63,61 +42,107 @@ include __DIR__ . '/includes/header.php';
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: url('assets/images/hero.webp');
+        background-image: url('assets/images/his-her/img-16.webp');
         background-size: cover;
         background-position: center;
         z-index: 1;
-        transform: scale(1.15); /* Static zoom */
-    }
-
-    .collab-hero-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.3);
-        z-index: 2;
     }
 
     .collab-hero-content {
         position: relative;
         z-index: 3;
         width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 0 5%;
+        box-sizing: border-box;
+    }
+
+    .hero-side-row {
+        position: absolute;
+        top: 30%; 
+        left: 57%;
+        transform: translateX(-50%);
+        width: 76%; 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 4;
+        pointer-events: none;
+        box-sizing: border-box;
+    }
+
+    .hero-side-text {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(2rem, 4.5vw, 4rem);
+        color: #fff;
+        font-weight: 300;
+        letter-spacing: 0.25em;
+        margin: 0;
+        opacity: 0.75;
+        text-transform: uppercase;
+    }
+
+    .hero-bottom-group {
+        position: absolute;
+        bottom: 8%;
+        text-align: center;
+        z-index: 5;
+        width: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
     }
 
+    .luxury-brand {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(1.8rem, 4vw, 3.8rem);
+        font-weight: 300;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 0.10em;
+        margin: 0;
+        line-height: 1.1;
+    }
+
+    .presentation-text {
+        font-family: 'Great Vibes', cursive;
+        font-size: clamp(2.5rem, 5.5vw, 5rem);
+        color: #fff;
+        margin: -12px 0 4px;
+        font-weight: 400;
+        opacity: 0.50;
+    }
+
+    .redefining-prestige {
+        font-family: 'Montserrat', sans-serif;
+        font-size: clamp(0.6rem, 1vw, 1rem);
+        letter-spacing: 8px;
+        text-transform: uppercase;
+        color: rgba(0, 0, 0, 1);
+        margin: 0;
+        font-weight: 700;
+        margin-top: 1rem;
+    }
 
     .collab-hero-arrow {
         position: absolute;
-        bottom: 40px;
+        bottom: 20px;
         left: 50%;
         transform: translateX(-50%);
         z-index: 3;
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         animation: bounce 2s infinite;
-        opacity: 0.7;
+        opacity: 0.5;
     }
 
     @keyframes bounce {
-
-        0%,
-        20%,
-        50%,
-        80%,
-        100% {
-            transform: translateY(0) translateX(-50%);
-        }
-
-        40% {
-            transform: translateY(-10px) translateX(-50%);
-        }
-
-        60% {
-            transform: translateY(-5px) translateX(-50%);
-        }
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+        40% { transform: translateY(-10px) translateX(-50%); }
+        60% { transform: translateY(-5px) translateX(-50%); }
     }
 
     /* --------------------------------------
@@ -186,59 +211,90 @@ include __DIR__ . '/includes/header.php';
     -------------------------------------- */
     .collab-media-grid {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         width: 100%;
-        margin-bottom: 0;
-        /* Changed to 0 as runway follows immediately */
+        max-width: 1350px;
+        height: auto;
+        margin: 0 auto;
+        padding: 0;
+        gap: 25px;
+        box-sizing: border-box;
+    }
+
+    .collab-media-item {
+        flex: 1; 
+        position: relative;
+        overflow: hidden;
+        height: 900px;
+    }
+
+    .collab-media-img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
     }
 
     /* --------------------------------------
     RUNWAY SECTION (Marquee)
     -------------------------------------- */
     .collab-runway {
-        padding: 100px 0;
-        background-color: #fff;
+        padding: 160px 0;
+        background-color: #faf8f0;
         overflow: hidden;
     }
 
     .collab-runway.collab-runway-secondary {
-        padding: 20px 0;
+        padding: 60px 0;
+    }
+
+    .runway-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     .runway-img-wrapper {
-        width: 25vw;
-        min-width: 300px;
-        aspect-ratio: 3/4;
+        width: auto;
+        height: 450px;
         flex-shrink: 0;
         overflow: hidden;
+        background-color: #faf8f0;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        box-sizing: border-box;
     }
 
     .runway-img-wrapper img {
-        width: 100%;
+        width: auto;
         height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s ease;
+        object-fit: contain;
+        display: block;
     }
 
-    .runway-img-wrapper:hover img {
-        transform: scale(1.05);
+    .runway-caption {
+        margin-top: 8px;
+        text-align: center;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.98rem;
+        letter-spacing: 0.06em;
+        color: #212529;
+        line-height: 1.3;
+        z-index: 999;
+        font-weight:bold;
     }
 
     .runway-marquee {
         display: flex;
         gap: 4rem;
-        animation: marquee 50s linear infinite;
+        animation: marquee 25s linear infinite;
         width: max-content;
     }
 
     @keyframes marquee {
-        0% {
-            transform: translateX(0);
-        }
-
-        100% {
-            transform: translateX(calc(-7 * (max(25vw, 300px) + 4rem)));
-        }
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(-6 * (max(25vw, 300px) + 4rem))); }
     }
 
     /* --------------------------------------
@@ -248,9 +304,39 @@ include __DIR__ . '/includes/header.php';
         display: flex;
         flex-wrap: wrap;
         width: 100%;
+        max-width: 1350px;
+        margin: 0 auto;
         padding: 0 40px 100px;
         gap: 40px;
         box-sizing: border-box;
+    }
+
+    .bottom-grid-heading {
+        max-width: 900px;
+        margin: 0 auto 12px;
+        text-align: center;
+        padding: 12px 40px;
+        box-sizing: border-box;
+
+    }
+
+    .bottom-grid-title {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.1rem;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin: 0 0 10px;
+        color: #212529;
+    }
+
+    .bottom-grid-subtitle {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.9rem;
+        line-height: 1.8;
+        color: #555;
+        letter-spacing: 0.02em;
+        margin: 0;
     }
 
     .bottom-grid-item {
@@ -267,7 +353,7 @@ include __DIR__ . '/includes/header.php';
     }
 
     /* --------------------------------------
-    ADDITIONAL COLLAB CONTENT
+    TEXT GRID SECTION
     -------------------------------------- */
     .collab-text-grid {
         display: flex;
@@ -298,10 +384,55 @@ include __DIR__ . '/includes/header.php';
         font-weight: 300;
         max-width: 450px;
         margin: 0 auto;
+        text-align: justify;
+    }
+
+    /* Video Controls */
+    .video-container {
+        position: relative;
+    }
+
+    .video-control-btn {
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.3s ease;
+        color: #fff;
+        font-size: 20px;
+    }
+
+    .video-control-btn:hover {
+        background: rgba(0, 0, 0, 0.5);
+        
+    }
+
+    .video-control-btn i {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Media Item Video Controls */
+    .collab-media-item .video-control-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
     }
 
     /* --------------------------------------
-    VIDEO SECTION
+    VIDEO/MEDIA SECTION
     -------------------------------------- */
     .collab-video-section {
         width: 100%;
@@ -312,40 +443,30 @@ include __DIR__ . '/includes/header.php';
     .video-container {
         position: relative;
         width: 100%;
-        aspect-ratio: 16/9;
         overflow: hidden;
         background: #000;
     }
 
-    .video-container video {
+    .responsive-media-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        display: block;
     }
 
-    .video-controls-bottom {
-        position: absolute;
-        bottom: 30px;
-        right: 30px;
-        z-index: 5;
+    .portrait-img { display: none; }
+    .landscape-img { display: block; }
+
+    @media screen and (max-aspect-ratio: 1/1) {
+        .portrait-img { display: block; }
+        .landscape-img { display: none; }
+        .video-container { aspect-ratio: 3/4; }
     }
 
-    .video-toggle-btn {
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        color: #fff;
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
-
-    .video-toggle-btn:hover {
-        background: rgba(255, 255, 255, 0.4);
+    @media screen and (min-aspect-ratio: 1/1) {
+        .portrait-img { display: none; }
+        .landscape-img { display: block; }
+        .video-container { aspect-ratio: 16/9; }
     }
 
     .collab-video-footer {
@@ -355,7 +476,7 @@ include __DIR__ . '/includes/header.php';
         margin: 0 auto;
         position: relative;
         z-index: 10;
-        background: #fff;
+        background: #faf8f0;
     }
 
     .collab-video-footer h4 {
@@ -375,22 +496,22 @@ include __DIR__ . '/includes/header.php';
         letter-spacing: 0.02em;
     }
 
-    /* =========================
-       PRODUCT SPOTLIGHT CSS
-    ========================== */
+    /* --------------------------------------
+    PRODUCT SPOTLIGHT SECTION
+    -------------------------------------- */
     .spotlight-section {
-        background: #fff;
+        background: #faf8f0;
         width: 100%;
         padding: 4rem 0;
     }
 
     .spotlight {
-        max-width: 1400px;
-        margin: 0 auto 100px;
-        padding: 0 24px;
+        max-width: 1350px;
+        margin: 0 auto -2px;
+        padding: 0 38px;
         display: grid;
         grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
-        gap: 6rem;
+        gap: 2rem;
         align-items: center;
     }
 
@@ -398,9 +519,7 @@ include __DIR__ . '/includes/header.php';
         width: 100%;
         border-radius: 0;
         overflow: hidden;
-        background-position: center;
-        background-size: cover;
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 4 / 5; 
         display: flex;
         justify-content: center;
         align-items: center;
@@ -409,12 +528,12 @@ include __DIR__ . '/includes/header.php';
     .spotlight-image img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain; 
         display: block;
     }
 
     .spotlight-meta {
-        max-width: 420px;
+        /* max-width: 420px; */
         line-height: 2.1;
         color: #212529;
     }
@@ -450,50 +569,15 @@ include __DIR__ . '/includes/header.php';
         list-style: none;
         margin-bottom: 18px;
         font-size: 13px;
-        color: #b0b0b0;
+        color:#564d4d;
         padding: 0;
+        font-weight:700;
     }
 
     .spotlight-features li::before {
         content: "✓";
         margin-right: 6px;
         color: #b0b0b0;
-    }
-
-    .spotlight-size-label {
-        font-size: 11px;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        margin-bottom: 6px;
-        color: #b0b0b0;
-    }
-
-    .spotlight-sizes {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 18px;
-    }
-
-    .size-pill {
-        width: 34px;
-        height: 30px;
-        border-radius: 6px;
-        border: 1px solid rgba(91, 18, 18, 0.08);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 11px;
-        cursor: pointer;
-        background: #fff;
-        color: #212529;
-        transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .size-pill:hover,
-    .size-pill.selected {
-        background: #212529;
-        color: #fff;
-        border-color: #212529;
     }
 
     .btn-spotlight {
@@ -517,546 +601,27 @@ include __DIR__ . '/includes/header.php';
         color: #fff;
         transform: translateY(-1px);
     }
-
-    .collab-media-item {
-        flex: 0 0 50%;
-        min-height: 800px;
-        position: relative;
-        overflow: hidden;
+    
+    .divider{
+         display:inline-block;
+         width:1.5px;
+         height:22px;
+         background:rgba(91, 18, 18, 0.6);
+         margin:0 15px;
+        vertical-align:middle;
     }
-
-    .collab-media-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .collab-media-black {
-        background-color: #000;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: #fff;
-        text-align: center;
-        padding: 40px;
-    }
-
-    .collab-media-title {
-        font-family: 'Cormorant Garamond', serif;
-        font-size: 2.5rem;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-        font-weight: 300;
-    }
-
-    .collab-media-title span {
-        font-family: 'Montserrat', sans-serif;
-        font-weight: 600;
-        font-size: 2.2rem;
-        letter-spacing: 0.05em;
-    }
-
-    /* Controls Overlay Placeholder */
-    .media-controls {
-        position: absolute;
-        top: 30px;
-        right: 30px;
-        display: flex;
-        gap: 15px;
-        z-index: 10;
-        opacity: 0.8;
-    }
-
-    .media-control-btn {
-        background: transparent;
-        border: none;
-        color: #fff;
-        font-size: 1.2rem;
-        cursor: pointer;
-    }
-
     /* --------------------------------------
-    RESPONSIVE DESIGN
+    EDITORIAL COLLAB FEATURE
     -------------------------------------- */
-
-    /* --- Tablet ≤ 992px --- */
-    @media screen and (max-width: 992px) {
-
-        /* Hero Overlay Styles */
-        .collab-hero { height: 90vh; }
-        .collab-hero-content { padding-top: 80px; }
-        .collab-hero-title-overlay {
-            font-size: clamp(2.5rem, 12vw, 5rem);
-        }
-
-        /* Intro */
-        .collab-intro {
-            padding: 60px 24px;
-        }
-
-        .collab-intro-subtitle {
-            padding: 0 20px;
-        }
-
-        /* Media Grid — stack panels vertically */
-        .collab-media-item {
-            flex: 0 0 100%;
-            min-height: 500px;
-        }
-
-        /* Runway */
-        .collab-runway {
-            padding: 60px 0;
-        }
-
-        .runway-img-wrapper {
-            width: 40vw;
-            min-width: 220px;
-        }
-
-        /* Bottom Grid */
-        .collab-bottom-grid {
-            padding: 0 24px 60px;
-            gap: 24px;
-        }
-
-        .bottom-grid-item {
-            min-width: 280px;
-            height: 480px;
-        }
-
-        /* Text Grid */
-        .collab-text-grid {
-            padding: 0 24px 60px;
-            gap: 40px;
-        }
-
-        /* Video */
-        .collab-video-section {
-            padding: 0 24px;
-        }
-
-        .collab-video-footer {
-            padding: 30px 24px 60px;
-        }
-
-        /* Spotlight */
-        .spotlight {
-            grid-template-columns: 1fr;
-            gap: 3rem;
-            margin-bottom: 60px;
-        }
-
-        .spotlight-image {
-            aspect-ratio: 4/3;
-        }
-
-        .spotlight-meta {
-            max-width: 100%;
-        }
-    }
-
-    /* --- Mobile ≤ 576px --- */
-    @media screen and (max-width: 576px) {
-
-        /* Hero Overlay Mobile */
-        .collab-hero { height: 75vh; }
-        .collab-hero-content { padding-top: 60px; }
-        .collab-hero-title-overlay {
-            font-size: clamp(2.5rem, 18vw, 4rem);
-            letter-spacing: 0.05em;
-        }
-        .collab-hero-eyebrow {
-            font-size: 0.65rem;
-            letter-spacing: 0.3em;
-            margin-bottom: 16px;
-        }
-
-        /* Intro */
-        .collab-intro {
-            padding: 48px 16px;
-        }
-
-        .collab-intro-title {
-            font-size: 1rem;
-            letter-spacing: 0.25em;
-            margin-bottom: 30px;
-        }
-
-        .collab-intro-subtitle {
-            padding: 0 8px;
-            font-size: 0.88rem;
-        }
-
-        .collab-intro-body {
-            font-size: 0.82rem;
-        }
-
-        .collab-explore-btn {
-            padding: 14px 36px;
-            font-size: 0.65rem;
-        }
-
-        /* Media Grid */
-        .collab-media-item {
-            min-height: 380px;
-        }
-
-        .collab-media-title {
-            font-size: 1.6rem;
-        }
-
-        .collab-media-title span {
-            font-size: 1.4rem;
-        }
-
-        .collab-media-black {
-            padding: 24px 16px;
-        }
-
-        /* Runway */
-        .collab-runway {
-            padding: 40px 0;
-        }
-
-        .runway-img-wrapper {
-            width: 60vw;
-            min-width: 180px;
-        }
-
-        /* Bottom Grid — full-width stacked */
-        .collab-bottom-grid {
-            flex-direction: column;
-            padding: 0 16px 48px;
-            gap: 16px;
-        }
-
-        .bottom-grid-item {
-            flex: none;
-            width: 100%;
-            min-width: 0;
-            height: 280px;
-        }
-
-        /* Text Grid — single column */
-        .collab-text-grid {
-            flex-direction: column;
-            padding: 0 16px 48px;
-            gap: 32px;
-        }
-
-        /* Video */
-        .collab-video-section {
-            padding: 0 8px;
-        }
-
-        .video-controls-bottom {
-            bottom: 16px;
-            right: 16px;
-        }
-
-        .collab-video-footer {
-            padding: 24px 16px 48px;
-        }
-
-        .collab-video-footer h4 {
-            font-size: 0.9rem;
-            letter-spacing: 0.25em;
-            margin-bottom: 16px;
-        }
-
-        .collab-video-footer p {
-            font-size: 0.78rem;
-        }
-
-        /* Spotlight */
-        .spotlight-section {
-            padding: 2rem 0;
-        }
-
-        .spotlight {
-            padding: 0 16px;
-            gap: 2rem;
-            margin-bottom: 40px;
-        }
-
-        .spotlight-image {
-            aspect-ratio: 1/1;
-        }
-
-        .spotlight-name {
-            font-size: 22px;
-        }
-
-        .spotlight-desc,
-        .spotlight-features {
-            font-size: 12px;
-        }
-    }
-</style>
-
-<div class="collab-page-wrapper">
-    <!-- Hero Banner -->
-    <section class="collab-hero">
-        <div class="collab-hero-bg"></div>
-        <div class="collab-hero-overlay"></div>
-        <div class="collab-hero-content">
-            <!-- <h1 class="collab-hero-title-overlay">HIS & HER'S</h1> -->
-        </div>
-        <div class="collab-hero-arrow">
-            <i class="bi bi-chevron-down"></i>
-        </div>
-    </section>
-
-    <!-- Introduction Text -->
-    <section class="collab-intro">
-        <h2 class="collab-intro-title">HIS & HERS</h2>
-
-        <p class="collab-intro-subtitle">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Id exercitationem dolorem reprehenderit, ex illum
-            officiis, laboriosam quis voluptatum veniam est quam voluptatibus harum molestiae ipsa? Obcaecati nostrum
-            dicta minus incidunt.
-            Unde, nesciunt earum.
-            Et facilis aperiam dolorum nobis adipisci omnis dolores laborum provident suscipit, culpa, ipsa fugit
-            accusantium reiciendis accusamus a recusandae eos corrupti officia sint nulla! Dolore, impedit similique!
-
-
-        </p>
-
-        <p class="collab-intro-body">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Illum tenetur dolore voluptas id deleniti cum alias
-            possimus fugit officiis repudiandae culpa, corrupti voluptatum. Quisquam sint accusamus molestias
-            blanditiis, doloribus porro.
-            Fugiat sit, reiciendis nemo voluptate quidem necessitatibus id illum vero qui perferendis sed, quis debitis
-            ut nostrum modi consequatur dignissimos dolorem aliquid earum quo laudantium porro quos excepturi ea.
-            Recusandae!
-
-        </p>
-
-        <a href="#" class="collab-explore-btn">EXPLORE</a>
-    </section>
-
-    <!-- Media Grid -->
-    <section class="collab-media-grid">
-        <!-- Left Image () -->
-        <div class="collab-media-item">
-            <img src="https://images.unsplash.com/photo-1596704017254-9b121068fb31?q=80&w=1974&auto=format&fit=crop"
-                alt="Collab-Media" class="collab-media-img">
-        </div>
-
-        <!-- Right Graphic/Logo -->
-        <div class="collab-media-item collab-media-black">
-            <div class="media-controls">
-                <button class="media-control-btn"><i class="bi bi-volume-mute"></i></button>
-                <button class="media-control-btn"><i class="bi bi-pause"></i></button>
-            </div>
-
-            <h3 class="collab-media-title">
-                WORLD OF <br><span>INANNA</span>
-            </h3>
-        </div>
-    </section>
-
-    <!-- Runway Section (Marquee) -->
-    <section class="collab-runway">
-        <div class="runway-marquee">
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1581338834647-b0fb40704e21?q=80&w=1974&auto=format&fit=crop"
-                    alt="Runway 1"></div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1594750801103-625807afb2fb?q=80&w=2070&auto=format&fit=crop"
-                    alt="Runway 2"></div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1521334885634-9552f9540871?q=80&w=2074&auto=format&fit=crop"
-                    alt="Runway 3"></div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=2070&auto=format&fit=crop"
-                    alt="Runway 4"></div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1539109132314-3477524c7540?q=80&w=1974&auto=format&fit=crop"
-                    alt="Runway 5"></div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1582266255765-fa5cf1a1d501?q=80&w=2070&auto=format&fit=crop"
-                    alt="Runway 6"></div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=1974&auto=format&fit=crop"
-                    alt="Runway 7"></div>
-
-            <!-- Duplicate for infinite loop -->
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1581338834647-b0fb40704e21?q=80&w=1974&auto=format&fit=crop">
-            </div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1594750801103-625807afb2fb?q=80&w=2070&auto=format&fit=crop">
-            </div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1521334885634-9552f9540871?q=80&w=2074&auto=format&fit=crop">
-            </div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=2070&auto=format&fit=crop">
-            </div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1539109132314-3477524c7540?q=80&w=1974&auto=format&fit=crop">
-            </div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1582266255765-fa5cf1a1d501?q=80&w=2070&auto=format&fit=crop">
-            </div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=1974&auto=format&fit=crop">
-            </div>
-        </div>
-    </section>
-
-    <!-- Bottom Grid Section -->
-    <section class="collab-bottom-grid">
-        <div class="bottom-grid-item">
-            <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070&auto=format&fit=crop"
-                alt="WOI Image 1">
-        </div>
-        <div class="bottom-grid-item">
-            <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070&auto=format&fit=crop"
-                alt="WOI Image 2">
-        </div>
-    </section>
-
-    <!-- Additional Collab Text -->
-    <section class="collab-text-grid">
-        <div class="collab-text-item">
-            <h4>HIS & HER COLLECTIONS</h4>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci cupiditate perspiciatis itaque
-                voluptatum animi quos nihil voluptatibus cumque reiciendis nesciunt aliquid, magnam atque iusto tempore
-                rerum necessitatibus totam numquam dignissimos!</p>
-        </div>
-        <div class="collab-text-item">
-            <h4>HIS & HER COLLECTIONS</h4>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci cupiditate perspiciatis itaque
-                voluptatum animi quos nihil voluptatibus cumque reiciendis nesciunt aliquid, magnam atque iusto tempore
-                rerum necessitatibus totam numquam dignissimos!
-            </p>
-        </div>
-    </section>
-
-    <!-- Video Section -->
-    <section class="collab-video-section">
-        <div class="video-container">
-            <video id="collabVideo" autoplay muted loop playsinline>
-                <source src="https://cdn.pixabay.com/video/2021/04/12/70914-538466632_large.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-            <div class="video-controls-bottom">
-                <button class="video-toggle-btn" id="videoToggle"><i class="bi bi-pause"></i></button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Runway Section (Marquee) -->
-    <section class="collab-runway collab-runway-secondary">
-        <div class="runway-marquee">
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1581338834647-b0fb40704e21?q=80&w=1974&auto=format&fit=crop"
-                    alt="Runway 1"></div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1594750801103-625807afb2fb?q=80&w=2070&auto=format&fit=crop"
-                    alt="Runway 2"></div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1521334885634-9552f9540871?q=80&w=2074&auto=format&fit=crop"
-                    alt="Runway 3"></div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=2070&auto=format&fit=crop"
-                    alt="Runway 4"></div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1539109132314-3477524c7540?q=80&w=1974&auto=format&fit=crop"
-                    alt="Runway 5"></div>
-
-            <!-- Duplicate for infinite loop -->
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1581338834647-b0fb40704e21?q=80&w=1974&auto=format&fit=crop">
-            </div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1594750801103-625807afb2fb?q=80&w=2070&auto=format&fit=crop">
-            </div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1521334885634-9552f9540871?q=80&w=2074&auto=format&fit=crop">
-            </div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=2070&auto=format&fit=crop">
-            </div>
-            <div class="runway-img-wrapper"><img
-                    src="https://images.unsplash.com/photo-1539109132314-3477524c7540?q=80&w=1974&auto=format&fit=crop">
-            </div>
-        </div>
-    </section>
-
-    <div class="collab-video-footer">
-        <h4>HIS & HER COLLECTIONS</h4>
-        <p>
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Molestias tenetur nesciunt non saepe iure
-            quasi sit quia, delectus accusantium consectetur, sequi, facilis eveniet consequuntur! Alias illum ut
-            doloremque quos dolor?
-            Officiis sed modi commodi aliquid? Qui harum eos perferendis quibusdam sapiente ducimus, culpa
-            exercitationem voluptatum minima cupiditate illo iste aliquid eaque enim. Explicabo, laudantium
-            consequuntur quasi corrupti eaque nulla ducimus.
-        </p>
-    </div>
-
-    <!--  -->
-
-    <!-- Product Spotlight -->
-
-    <section class="spotlight-section">
-        <div class="spotlight">
-            <!-- LEFT: IMAGE -->
-            <div class="spotlight-image">
-                <img src="https://images.unsplash.com/photo-1596704017254-9b121068fb31?q=80&w=1974&auto=format&fit=crop"
-                    alt="Featured Product">
-            </div>
-
-            <!-- RIGHT: CONTENT -->
-            <div class="spotlight-meta">
-                <div class="section-label">Product spotlight</div>
-                <h2 class="spotlight-name">Limited Edition Collaboration Piece</h2>
-                <div class="spotlight-price">₹12,499.00</div>
-                <p class="spotlight-desc">
-                    Experience the pinnacle of our latest collaboration. This piece combines artisan craftsmanship with
-                    modern silhouettes, creating a timeless addition to your wardrobe. Perfect for those who appreciate
-                    fine detailing and unparalleled comfort.
-                </p>
-                <ul class="spotlight-features">
-                    <li>Exclusive handcrafted embroidery</li>
-                    <li>Premium breathable fabric blend</li>
-                    <li>Signature collaboration branding</li>
-                    <li>Limited edition production</li>
-                </ul>
-                <div class="spotlight-size-label">Select size</div>
-                <div class="spotlight-sizes" id="sizeSelector">
-                    <div class="size-pill">XS</div>
-                    <div class="size-pill selected">S</div>
-                    <div class="size-pill">M</div>
-                    <div class="size-pill">L</div>
-                </div>
-                <div class="spotlight-actions">
-                    <a class="btn-spotlight" href="products.php">SHOP NOW</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-</div>
-
-<!-- ============================
-     EDITORIAL COLLAB FEATURE
-     ============================ -->
-<style>
-    /* --- Editorial Feature --- */
     .editorial-feature {
-        background: #fff;
+        background: #faf8f0;
+        padding-bottom: 40px;
     }
 
     .editorial-hero {
         position: relative;
         width: 100%;
-        height: 70vh;
+        height: 85vh;
         min-height: 450px;
         overflow: hidden;
     }
@@ -1065,79 +630,77 @@ include __DIR__ . '/includes/header.php';
         width: 100%;
         height: 100%;
         object-fit: cover;
-        object-position: center 30%;
+        object-position: center 40%;
     }
 
-    .editorial-hero-label {
+    .editorial-hero-content {
         position: absolute;
-        bottom: 2.5rem;
+        bottom: 4%;
         left: 50%;
         transform: translateX(-50%);
         text-align: center;
         color: #fff;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+        width: 100%;
+        padding: 0 20px;
+    }
+
+    .editorial-main-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        flex-direction: column;
+         
+    }
+
+    .thank-you-text {
         font-family: 'Cormorant Garamond', serif;
-        font-size: 1.5rem;
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
         font-weight: 500;
-        letter-spacing: 0.18em;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
-        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+        line-height: 1.1;
         white-space: nowrap;
     }
 
-    .editorial-body {
-        text-align: center;
-        padding: 60px 40px 40px;
-        max-width: 580px;
-        margin: 0 auto;
+    .your-time-text {
+        font-family: 'Great Vibes', cursive;
+        font-size: clamp(2.2rem, 5vw, 3.5rem);
+        font-weight: 400;
+        opacity: 0.9;
+        white-space: nowrap;
     }
 
-    .editorial-body h3 {
-        font-family: 'Cormorant Garamond', serif;
-        font-size: 2rem;
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        color: #1a1a1a;
-        margin-bottom: 16px;
-    }
-
-    .editorial-body p {
+    .redefining-prestige-editorial {
         font-family: 'Montserrat', sans-serif;
-        font-size: 0.8rem;
-        color: #555;
-        letter-spacing: 0.03em;
-        line-height: 1.8;
-        margin-bottom: 20px;
+        font-size: clamp(0.6rem, 1vw, 0.8rem);
+        letter-spacing: 0.8em;
+        text-transform: uppercase;
+        margin-top: 10px;
+        opacity: 0.8;
     }
 
-    .editorial-divider {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 40px;
-    }
-
-    .editorial-divider svg {
-        width: 40px;
-        opacity: 0.5;
-    }
-
-    .editorial-logo-divider {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 40px;
-    }
-
-    .editorial-logo {
-        height: 90px;
-        width: auto;
-        opacity: 1;
+    .editorial-subtext {
+        font-family: 'Montserrat', sans-serif;
+        font-size: clamp(0.7rem, 1.2vw, 0.85rem);
+        font-weight: 300;
+        letter-spacing: 0.05em;
+        max-width: 450px;
+        margin: 20px auto 0;
+        line-height: 1.6;
+        opacity: 0.9;
     }
 
     .editorial-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 8px;
+        max-width: 1350px; 
+        margin: 0 auto; 
         padding: 0 8px 8px;
         overflow: hidden;
+        box-sizing: border-box;
     }
 
     .editorial-grid-item {
@@ -1156,10 +719,125 @@ include __DIR__ . '/includes/header.php';
         transform: scale(1.08);
     }
 
-    /* --- Split Form Layout --- */
+    .living-craft {
+        background: #faf8f0;
+        padding: 15px 0 24px;
+    }
+
+    .living-craft-inner {
+        max-width: 900px;
+        margin: 0 auto 24px;
+        text-align: center;
+        padding: 0 40px;
+        box-sizing: border-box;
+    }
+
+    .living-craft-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(2rem, 4vw, 3.5rem);
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        font-weight: 400;
+        color: #212529;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.15em;
+        flex-wrap: wrap;
+    }
+
+    .inline-logo {
+        height: 1.4em;
+        width: auto;
+        vertical-align: middle;
+        display: inline-block;
+        
+    }
+
+    /* Mobile/Tablet specific logo sizing */
+    @media (max-width: 1024px) {
+        .inline-logo {
+            height: 1.6em;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .inline-logo {
+            height: 1.6em;
+        }
+        .living-craft-title {
+            gap: 0.1em;
+        }
+    }
+
+    .living-craft-sub {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.95rem;
+        line-height: 1.9;
+        color: #666;
+        max-width: 720px;
+        margin: 0 auto;
+        opacity: 0.9;
+        text-align: justify;
+    }
+
+    .living-craft-tagline {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.9rem;
+        font-style: italic;
+        color: #5a5a5a;
+        max-width: 680px;
+        margin: 4px auto 12px;
+    }
+
+    /* .living-craft-badge {
+        margin-top: 16px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .living-craft-badge .badge-box {
+        background: #000;
+        padding: 12px;
+        display: inline-block;
+        border-radius: 2px;
+    }
+
+    .living-craft-badge img {
+        width: 110px;
+        height: auto;
+        display: block;
+    } */
+
+    .living-craft-strip {
+        max-width: 1350px;
+        margin: 28px auto 60px;
+        padding: 0 8px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        box-sizing: border-box;
+    }
+
+    .living-craft-img {
+        aspect-ratio: 4/3;
+        overflow: hidden;
+    }
+
+    .living-craft-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* --------------------------------------
+    SPLIT FORM LAYOUT
+    -------------------------------------- */
     .collab-form-wrapper {
         padding: 80px 40px;
-        background: #f9f7f4;
+        background: #faf8f0;
     }
 
     .collab-form-section {
@@ -1215,7 +893,7 @@ include __DIR__ . '/includes/header.php';
     }
 
     .collab-form-panel {
-        background: #fafaf8;
+        background: #faf8f0;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -1313,181 +991,388 @@ include __DIR__ . '/includes/header.php';
         color: #1a1a1a;
     }
 
-    /* --- Tablet ≤ 992px --- */
+    /* --------------------------------------
+    RESPONSIVE MEDIA QUERIES
+    -------------------------------------- */
+
+    /* Tablet ≤ 1024px */
+    @media screen and (max-width: 1024px) {
+        .hero-side-row { display: none; } 
+        .collab-hero { height: 100vh; min-height: unset; padding: 0; }
+        .hero-bottom-group { position: absolute; top: 85%; left: 50%; transform: translate(-50%, -50%); width: 90%; bottom: auto; }
+        .luxury-brand { font-size: 3rem; }
+        .presentation-text { font-size: 3.5rem; }
+        .redefining-prestige { font-size: 0.75rem; letter-spacing: 0.4em; }
+        .collab-intro { padding: 60px 24px; }
+        .collab-intro-subtitle { padding: 0 20px; }
+        .collab-media-grid { max-width: 100%; padding: 0 24px; height: auto; flex-wrap: wrap; gap: 25px; }
+        .collab-media-item { flex: 0 0 100%; min-height: 500px; }
+        .collab-runway { padding: 60px 0; }
+        .runway-img-wrapper { width: 40vw; min-width: 220px; }
+        .collab-bottom-grid { padding: 0 24px 60px; gap: 24px; max-width: 100%; }
+        .bottom-grid-item { min-width: 280px; height: 480px; }
+        .collab-text-grid { padding: 0 24px 60px; gap: 40px; }
+        .collab-video-section { padding: 0 24px; }
+        .collab-video-footer { padding: 24px 16px 15px; }
+        .spotlight { grid-template-columns: 1fr; gap: 3rem; margin-bottom: 60px; }
+        .spotlight-image { aspect-ratio: 1367 / 2048; }
+        .spotlight-meta { max-width: 100%; }
+        .editorial-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; padding: 0 24px 24px; max-width: 100%; }
+        
+        .thank-you-text { font-size: clamp(1.4rem, 3.5vw, 1.8rem); }
+        .your-time-text { font-size: clamp(1.8rem, 4.5vw, 2.5rem); }
+    }
+
+    /* Split Form Tablet ≤ 992px */
     @media (max-width: 992px) {
-        .editorial-hero {
-            height: 55vh;
-        }
-
-        .editorial-hero-label {
-            font-size: 1.1rem;
-            white-space: normal;
-            padding: 0 30px;
-        }
-
-        .editorial-body {
-            padding: 50px 30px 30px;
-        }
-
-        .editorial-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
-            padding: 0 6px 6px;
-        }
-
-        .collab-form-wrapper {
-            padding: 60px 30px;
-        }
-
-        .collab-form-section {
-            grid-template-columns: 1fr;
-            max-width: 600px;
-        }
-
-        .collab-form-image {
-            height: 45vh;
-        }
-
-        .collab-form-panel {
-            padding: 40px 30px;
-        }
-        .collab-form-panel .form-row {
-            grid-template-columns: 1fr;
-        }
+        .collab-form-wrapper { padding: 60px 30px; }
+        .collab-form-section { grid-template-columns: 1fr; max-width: 600px; }
+        .collab-form-image { height: 65vh; }
+        .collab-form-panel { padding: 40px 30px; }
+        .collab-form-panel .form-row { grid-template-columns: 1fr; }
     }
 
-    /* --- Mobile ≤ 576px --- */
-    @media (max-width: 576px) {
-        .editorial-hero {
-            height: 45vh;
-            min-height: 280px;
-        }
-
-        .editorial-hero-label {
-            font-size: 0.85rem;
-            letter-spacing: 0.1em;
-            padding: 0 16px;
-            bottom: 1.5rem;
-        }
-
-        .editorial-body {
-            padding: 40px 20px 20px;
-        }
-
-        .editorial-body h3 {
-            font-size: 1.5rem;
-            letter-spacing: 0.1em;
-        }
-
-        .editorial-body p {
-            font-size: 0.75rem;
-        }
-
-        .editorial-logo {
-            height: 75px;
-        }
-
-        .editorial-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 4px;
-            padding: 0 4px 4px;
-        }
-
-        .collab-form-wrapper {
-            padding: 40px 16px;
-        }
-
-        .collab-form-section {
-            grid-template-columns: 1fr;
-        }
-
-        .collab-form-image {
-            height: 40vh;
-        }
-
-        .collab-form-image-text h3 {
-            font-size: 1.8rem;
-        }
-
-        .collab-form-image-text {
-            left: 1.5rem;
-            bottom: 1.5rem;
-        }
-
-        .collab-form-panel {
-            padding: 32px 20px;
-        }
-
-        .collab-form-panel h3 {
-            font-size: 1.6rem;
-            margin-bottom: 24px;
-        }
-        .collab-form-panel .btn-submit {
-            width: 100%;
-            text-align: center;
-            padding: 14px 20px;
-        }
+    /* Mobile ≤ 768px */
+    @media (max-width: 768px) {
+        .editorial-hero { height: 70vh; }
+        .thank-you-text { font-size: clamp(1.2rem, 6vw, 1.5rem); }
+        .your-time-text { font-size: clamp(1.6rem, 8vw, 2.2rem); }
+        .redefining-prestige-editorial { letter-spacing: 0.6em; }
+        .living-craft { padding: 10px 0 16px; }
+        .living-craft-strip { grid-template-columns: repeat(2, 1fr); gap: 6px; padding: 0 16px; }
+        .living-craft-inner { padding: 0 24px; }
     }
 
-    /* --- Extra Small ≤ 420px --- */
+    /* Mobile ≤ 576px */
+    @media screen and (max-width: 576px) {
+        .collab-hero { height: 100vh; padding: 0; }
+        .hero-bottom-group { top: 86%; transform: translate(-50%, -50%); width: 95%; bottom: auto; }
+        .luxury-brand { font-size: 2rem; }
+        .presentation-text { font-size: 2.8rem; margin: -5px 0 5px; }
+        .redefining-prestige { font-size: 0.55rem; letter-spacing: 0.3em; }
+        .collab-intro { padding: 48px 16px; }
+        .collab-intro-title { font-size: 1rem; letter-spacing: 0.25em; margin-bottom: 30px; }
+        .collab-intro-subtitle { padding: 0 8px; font-size: 0.88rem; }
+        .collab-intro-body { font-size: 0.82rem; }
+        .collab-explore-btn { padding: 14px 36px; font-size: 0.65rem; }
+        .collab-media-grid { padding: 0 16px; height: auto; flex-wrap: wrap; gap: 20px; }
+        .collab-media-item { min-height: 380px; }
+        .collab-runway { padding: 40px 0; }
+        .runway-img-wrapper { width: 60vw; min-width: 180px; }
+        .collab-bottom-grid { flex-direction: row; flex-wrap: nowrap; padding: 0 16px 48px; gap: 12px; max-width: 100%; }
+        .bottom-grid-item { flex: 1; width: auto; min-width: 0; height: 250px; }
+        .bottom-grid-item img { object-fit: contain; background: rgba(0,0,0,0.02); }
+        .collab-text-grid { flex-direction: column; padding: 0 16px 48px; gap: 32px; }
+        .collab-text-item:nth-child(2) { display: none; }
+        .collab-video-section { padding: 0 8px; }
+        .collab-video-footer { padding: 24px 16px 15px; }
+        .collab-video-footer h4 { font-size: 0.9rem; letter-spacing: 0.25em; margin-bottom: 16px; }
+        .collab-video-footer p { font-size: 0.78rem; }
+        .spotlight-section { padding: 2rem 0; }
+        .spotlight { padding: 0 16px; gap: 2rem; margin-bottom: 40px; }
+        .spotlight-image { aspect-ratio: 1367 / 2048; }
+        .spotlight-name { font-size: 22px; }
+        .spotlight-desc, .spotlight-features { font-size: 12px; }
+        .editorial-grid { grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 0 16px 16px; }
+        .living-craft-strip { grid-template-columns: 1fr; }
+        .collab-form-wrapper { padding: 40px 16px; }
+        .collab-form-section { grid-template-columns: 1fr; }
+        .collab-form-image { height: 65vh; }
+        .collab-form-image-text h3 { font-size: 1.8rem; }
+        .collab-form-image-text { left: 1.5rem; bottom: 1.5rem; }
+        .collab-form-panel { padding: 32px 20px; }
+        .collab-form-panel h3 { font-size: 1.6rem; margin-bottom: 24px; }
+        .collab-form-panel .btn-submit { width: 100%; text-align: center; padding: 14px 20px; }
+    }
+
+    /* Extra Small ≤ 420px */
     @media (max-width: 420px) {
-        .editorial-grid {
-            grid-template-columns: 1fr;
-        }
+        .editorial-grid { grid-template-columns: 1fr; }
     }
 </style>
 
+<div class="collab-page-wrapper">
+    <!-- Hero Banner -->
+    <section class="collab-hero">
+        <div class="collab-hero-bg"></div>
+        
+        <div class="collab-hero-content">
+            <div class="hero-side-row">
+                <h2 class="hero-side-text">HIS</h2>
+                <h2 class="hero-side-text">HERS</h2>
+            </div>
+            <div class="hero-bottom-group">
+                <h1 class="luxury-brand">BY INANNA</h1>
+                <!-- <p class="presentation-text">INANNA</p> -->
+                <p class="redefining-prestige">Wedding Guest Collection</p>
+            </div>
+        </div>
+
+        <div class="collab-hero-arrow">
+            <i class="bi bi-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- Introduction Text -->
+    <section class="collab-intro">
+        <h2 class="collab-intro-title">HIS & HERS</h2>
+
+        <p class="collab-intro-subtitle">
+            Celebrate togetherness with our exclusive His & Hers collection, thoughtfully designed for couples who appreciate elegance, harmony, and timeless fashion. At INANNA, we believe that style is not just individual it is a shared expression of love, celebration, and unforgettable moments.
+
+            From wedding festivities to festive gatherings and grand occasions, our coordinated ensembles are crafted to create a visually stunning and emotionally memorable presence. Each outfit reflects intricate craftsmanship, premium fabrics, and a refined aesthetic that embodies luxury and sophistication.
+
+
+        </p>
+
+        <p class="collab-intro-body">
+           The His & Hers collection is a seamless blend of tradition and contemporary couture, designed to complement both personalities while maintaining individuality. Every piece is meticulously curated to ensure color harmony, exquisite detailing, and flawless tailoring that enhances the grace of both him and her.
+
+           Whether it is a wedding celebration, engagement, festive occasion, or a special photoshoot, INANNA’s coordinated outfits redefine couple styling with unmatched elegance and prestige. Step into a world where fashion becomes a shared statement of luxury.
+
+        </p>
+
+        <a href="#Why-Inanna" class="collab-explore-btn">EXPLORE</a>
+    </section>
+
+    <!-- Media Grid -->
+    <section class="collab-media-grid">
+        <!-- Left Image () -->
+        <div class="collab-media-item">
+            <img src="assets/images/his-her/P-hh.webp"
+                alt="Collab-Media" class="collab-media-img">
+        </div>
+
+        <!-- Right Image (Fallback for Video) -->
+        <div class="collab-media-item">
+            <video class="collab-media-img" autoplay muted loop playsinline>
+                <source src="assets/video/in-hers.mp4" type="video/mp4">
+                <img src="assets/images/his-her/P-hh.webp" alt="Collab-Media-Right" class="collab-media-img">
+            </video>
+            <div class="video-control-btn" onclick="toggleVideo(this)">
+                <i class="bi bi-pause-fill"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Runway Section (Marquee) -->
+    <section class="collab-runway">
+        <div class="runway-marquee">
+            <?php
+            $marquee_images = [11, 7, 18, 6, 12, 17];
+            $marquee_captions = [
+                'Radiant Festive Couture',
+                'Royal Contemporary Ethnic',
+                'Modern Regal Statement',
+                'Timeless Ethnic Elegance',
+                'Royal Pink Indo-Western',
+                'Vibrant Heritage Couture'
+            ];
+            foreach ($marquee_images as $idx => $i): 
+                $caption = $marquee_captions[$idx] ?? '';
+            ?>
+                <div class="runway-card">
+                    <div class="runway-img-wrapper">
+                        <img src="assets/images/his-her/image-<?php echo $i; ?>.webp" alt="Runway <?php echo $i; ?>">
+                    </div>
+                    <?php if (!empty($caption)): ?>
+                        <div class="runway-caption"><?php echo $caption; ?></div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+
+            <!-- Duplicate for infinite loop -->
+            <?php foreach ($marquee_images as $idx => $i): 
+                $caption = $marquee_captions[$idx] ?? '';
+            ?>
+                <div class="runway-card">
+                    <div class="runway-img-wrapper">
+                        <img src="assets/images/his-her/image-<?php echo $i; ?>.webp" alt="" aria-hidden="true">
+                    </div>
+                    <?php if (!empty($caption)): ?>
+                        <div class="runway-caption" aria-hidden="true"><?php echo $caption; ?></div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <!-- Bottom Grid Section -->
+    <div class="bottom-grid-heading">
+        <h3 class="bottom-grid-title">Wedding Wardrobe For His & Hers</h3>
+        <p class="bottom-grid-subtitle">Curated Looks for Wedding Guest Couples, Not for Bride & Groom</p>
+    </div>
+    <section class="collab-bottom-grid">
+        <div class="bottom-grid-item">
+            <img src="assets/images/his-her/r-12.webp"
+                alt="WOI Image 1">
+        </div>
+        <div class="bottom-grid-item">
+            <img src="assets/images/his-her/r-3.webp"
+                alt="WOI Image 2">
+        </div>
+    </section>
+
+    <!-- Additional Collab Text -->
+    <section class="collab-text-grid">
+        <div class="collab-text-item">
+            <h4>HER COLLECTIONS</h4>
+            <p>Discover a curated selection of luxurious ensembles designed to celebrate the elegance and individuality of the modern woman. From graceful festive wear to statement couture pieces, each design reflects exquisite craftsmanship, rich fabrics, and intricate detailing. The Her Collection by INANNA embodies timeless beauty, blending tradition with contemporary style for unforgettable celebrations.</p>
+        </div>
+        <div class="collab-text-item">
+            <h4>HIS COLLECTIONS</h4>
+            <p>Experience refined ethnic wear crafted for the modern gentleman who values sophistication and tradition. The His Collection by INANNA features meticulously tailored silhouettes, premium fabrics, and subtle yet striking detailing. Designed for weddings, festive occasions, and grand celebrations, each ensemble reflects confidence, elegance, and timeless style.
+            </p>
+        </div>
+    </section>
+
+    <!-- Home Media Section -->
+    <section class="collab-video-section">
+        <div class="video-container">
+            <video class="responsive-media-img" autoplay muted loop playsinline>
+                <source src="assets/video/his-her-Collab.mp4" type="video/mp4">
+                <img src="assets/images/his-her/P-hh.webp" alt="Portrait Home" class="responsive-media-img portrait-img">
+                <img src="assets/images/his-her/l-hh.webp" alt="Landscape Home" class="responsive-media-img landscape-img">
+            </video>
+            <div class="video-control-btn" onclick="toggleVideo(this)">
+                <i class="bi bi-pause-fill"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Runway Section (Marquee) -->
+    <section class="collab-runway collab-runway-secondary">
+        <div class="runway-marquee">
+            <div class="runway-img-wrapper"><img src="assets/images/his-her/image-3.webp" alt="Runway 8"></div>
+            <div class="runway-img-wrapper"><img src="assets/images/his-her/run-13.webp" alt="Runway 2"></div>
+            <div class="runway-img-wrapper"><img src="assets/images/his-her/r22.webp" alt="Runway 4"></div>
+            <div class="runway-img-wrapper"><img src="assets/images/his-her/image-4.webp" alt="Runway 6"></div>
+            <div class="runway-img-wrapper"><img src="assets/images/his-her/r24.webp" alt="Runway 5"></div>
+            <div class="runway-img-wrapper"><img src="assets/images/his-her/run-10.webp" alt="Runway 5"></div>
+
+            <!-- Duplicate for infinite loop -->
+            <div class="runway-img-wrapper"><img src="assets/images/his-her/image-3.webp"></div>
+            <div class="runway-img-wrapper"><img src="assets/images/his-her/run-13.webp"></div>
+            <div class="runway-img-wrapper"><img src="assets/images/his-her/r22.webp"></div>
+            <div class="runway-img-wrapper"><img src="assets/images/his-her/image-4.webp"></div>
+            <div class="runway-img-wrapper"><img src="assets/images/his-her/r24.webp"></div>
+            <div class="runway-img-wrapper"><img src="assets/images/his-her/run-10.webp"></div>
+        </div>
+    </section>
+
+    <div class="collab-video-footer">
+        <h4>HIS  & HERS COLLECTION</h4>
+        <p>
+            The His & Hers collections by INANNA celebrate the beauty of coordinated elegance, where individuality meets harmonious style. Thoughtfully designed for modern couples, each ensemble reflects refined craftsmanship, luxurious fabrics, and timeless aesthetics. Whether for weddings, festive occasions, or grand celebrations, these collections bring together tradition and contemporary couture to create moments that are as memorable as they are stylish.
+        </p>
+    </div>
+
+    
+
+    <!-- Product Spotlight -->
+
+    <section class="spotlight-section" id="Why-Inanna">
+        <div class="spotlight">
+            <!-- LEFT: IMAGE -->
+            <div class="spotlight-image">
+                <img src="assets/images/his-her/image-20.webp"
+                    alt="Featured Product">
+            </div>
+
+            <!-- RIGHT: CONTENT -->
+            <div class="spotlight-meta">
+                <!-- <div class="section-label">Product spotlight</div> -->
+                <h2 class="spotlight-name">Why Choose HIS & HERS by INANNA?</h2>
+                <div class="spotlight-price">Packages start from ₹99,999 <strong><i>(Six Sets)</i></strong> | Includes His & Hers outfits for <strong><i> Haldi, Sangeet & Wedding.</i></strong></div>
+                <ul class="spotlight-features">
+                    <li>Complete wedding guest wardrobe planned for you excluding Bride & Groom</li>
+                    <li>Coordinated His & Hers looks for 3–4 functions</li>
+                    <li>Designed to twin tastefully, not match loudly</li>
+                    <li>Optional family / child styling available</li>
+                    <li>Perfect for destination weddings & multi‑function celebrations</li>
+                    <li>Personal consultation with INANA designers</li>
+                    <li>Limited seasonal bookings to ensure exclusivity</li>
+                </ul>
+                <!-- <div class="spotlight-size-label">Select size</div>
+                <div class="spotlight-sizes" id="sizeSelector">
+                    <div class="size-pill">XS</div>
+                    <div class="size-pill selected">S</div>
+                    <div class="size-pill">M</div>
+                    <div class="size-pill">L</div>
+                </div> -->
+                <div class="spotlight-actions">
+                     <a class="btn-spotlight" href="appointment.php">BOOK CONSULTATION</a>
+                     <!-- <span class="divider"></span>
+                    <a class="btn-spotlight" href="shop.php">SHOP NOW</a> -->
+                   
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
 <!-- Editorial Feature Section -->
 <section class="editorial-feature">
-    <!-- Hero Image with Label -->
+    <!-- Hero Image with Centered Content -->
     <div class="editorial-hero">
-        <img src="https://images.unsplash.com/photo-1615529182904-14819c35db37?q=80&w=2080&auto=format&fit=crop"
-            alt="Collaboration Feature">
-        <div class="editorial-hero-label">His &amp; Her Collections — The Collaboration</div>
-    </div>
-
-    <!-- Title & Description -->
-    <div class="editorial-body">
-        <h3>The Living Craft</h3>
-        <p>
-            A limited-edition collaboration that celebrates the art of togetherness.
-            Handcrafted for those who believe that beauty is a shared language,
-            in collaboration with The Inanna Art Foundation.
-        </p>
-        <!-- Site Logo as divider -->
-        <div class="editorial-logo-divider">
-            <img src="assets/images/footer_logo.webp" alt="Inanna" class="editorial-logo"
-                style=" background-color: #8B0000;">
-        </div>
-    </div>
-
-    <!-- 4-column Image Grid -->
-    <div class="editorial-grid">
-        <div class="editorial-grid-item">
-            <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=800&auto=format&fit=crop"
-                alt="Collab 1">
-        </div>
-        <div class="editorial-grid-item">
-            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop"
-                alt="Collab 2">
-        </div>
-        <div class="editorial-grid-item">
-            <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop"
-                alt="Collab 3">
-        </div>
-        <div class="editorial-grid-item">
-            <img src="https://images.unsplash.com/photo-1583744946564-b52d01e7f922?q=80&w=800&auto=format&fit=crop"
-                alt="Collab 4">
+        <img src="assets/images/his-her/hh-L.webp" alt="Thank You from Inanna">
+        <div class="editorial-hero-content">
+            <div class="editorial-main-text">
+                <p class="thank-you-text">Attend the wedding.</p>
+                <p class="your-time-text">We’ll plan the wardrobe.</p>
+            </div>
+            <!-- <div class="redefining-prestige-editorial">REDEFINING PRESTIGE</div> -->
+            <!-- <p class="editorial-subtext">
+                very great comfort, especially among beautiful and expensive surroundings. By all accounts he leads a life of considerable luxury
+            </p> -->
         </div>
     </div>
 </section>
+
+<section class="living-craft">
+    <div class="living-craft-inner">
+        <div class="living-craft-title">WORLD OF<img src="https://worldofinanna.org/assets/images/logo-inanna.avif" alt="Inanna" class="inline-logo"></div>
+        <div class="living-craft-tagline"><em>"QUDRAT-E-ILAHI"</em></div>
+        <p class="living-craft-sub">
+            Rooted in the belief that beauty exists in everything—even in what may traditionally be seen as flawed—I am inspired to <strong>embrace and celebrate the unconventional</strong>. This philosophy infuses my designs with a unique aesthetic that challenges the norms of fashion.
+            Guided by Alexander McQueen’s principle of mastering the rules before breaking them, my creations are not only innovative but deeply respectful of craftsmanship and tradition.
+            Introducing <strong>INANNA</strong>, a brand born from passion and inspired by the Sumerian goddess of love and power. Built on the pillars of <strong>boundless creativity, ethics, and slow fashion</strong>, the world of INANNA seeks to inspire a broader appreciation of beauty, encouraging us all to look beyond societal norms and embrace diversity in all its forms.
+        </p>
+    </div>
+    <!-- <div class="living-craft-badge">
+        <div class="badge-box">
+            <img src="assets/images/footer-logo.png" alt="Inanna crest">
+        </div>
+    </div> -->
+</section>
+
+<!-- 4-column Image Grid -->
+<div class="editorial-grid">
+    <div class="editorial-grid-item">
+        <img src="assets/images/his-her/image-21.WEBP"
+            alt="Collab 1">
+    </div>
+    <div class="editorial-grid-item">
+        <img src="assets/images/his-her/image-22.WEBP"
+            alt="Collab 2">
+    </div>
+    <div class="editorial-grid-item">
+        <img src="assets/images/his-her/image-23.WEBP"
+            alt="Collab 3">
+    </div>
+    <div class="editorial-grid-item">
+        <img src="assets/images/his-her/image-24.webp"
+            alt="Collab 4">
+    </div>
+</div>
 
 <!-- Consultation Form — Split Layout -->
 <div class="collab-form-wrapper">
     <section class="collab-form-section">
         <!-- LEFT: Image Panel -->
         <div class="collab-form-image">
-            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1887&auto=format&fit=crop"
+            <img src="assets/images/his-her/book.webp"
                 alt="Consultation">
             <div class="collab-form-image-overlay"></div>
             <div class="collab-form-image-text">
@@ -1497,7 +1382,7 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <!-- RIGHT: Form Panel -->
-        <div class="collab-form-panel">
+        <div class="collab-form-panel" id="booking-appointment">
             <div class="form-eyebrow">Private Consultation</div>
             <h3>Book Your Appointment</h3>
 
@@ -1505,6 +1390,16 @@ include __DIR__ . '/includes/header.php';
                 <div>
                     <label>NAME</label>
                     <input type="text" name="name" required>
+                </div>
+
+                <div>
+                    <label>MOBILE NUMBER</label>
+                    <input type="tel" name="mobile" required>
+                </div>
+
+                <div>
+                    <label>EMAIL ID</label>
+                    <input type="email" name="email" required>
                 </div>
 
                 <div>
@@ -1533,22 +1428,21 @@ include __DIR__ . '/includes/header.php';
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var video = document.getElementById('collabVideo');
-        var btn = document.getElementById('videoToggle');
-        if (btn && video) {
-            var icon = btn.querySelector('i');
-            btn.addEventListener('click', function () {
-                if (video.paused) {
-                    video.play();
-                    icon.classList.remove('bi-play');
-                    icon.classList.add('bi-pause');
-                } else {
-                    video.pause();
-                    icon.classList.remove('bi-pause');
-                    icon.classList.add('bi-play');
-                }
-            });
-        }
+        // --- Video Toggle Play/Pause ---
+        window.toggleVideo = function(btn) {
+            const video = btn.parentElement.querySelector('video');
+            const icon = btn.querySelector('i');
+            
+            if (video.paused) {
+                video.play();
+                icon.classList.remove('bi-play-fill');
+                icon.classList.add('bi-pause-fill');
+            } else {
+                video.pause();
+                icon.classList.remove('bi-pause-fill');
+                icon.classList.add('bi-play-fill');
+            }
+        };
 
         // --- Lead Form AJAX Submission ---
         const leadForm = document.querySelector('.lead-form');
@@ -1616,6 +1510,42 @@ include __DIR__ . '/includes/header.php';
                     submitBtn.textContent = originalBtnText;
                 });
             });
+        }
+
+        // --- Marquee Vertical Scale Emphasis ---
+        const marqueeItems = document.querySelectorAll('.runway-img-wrapper');
+        if (marqueeItems.length > 0) {
+            function updateMarqueeScaling() {
+                const viewportCenter = window.innerWidth / 2;
+                marqueeItems.forEach(item => {
+                    const rect = item.getBoundingClientRect();
+                    // Only calculate if item is in or near viewport for performance
+                    if (rect.right < 0 || rect.left > window.innerWidth) return;
+
+                    const itemCenter = rect.left + rect.width / 2;
+                    const distance = Math.abs(viewportCenter - itemCenter);
+                    const threshold = window.innerWidth * 0.45;
+                    let scaleValue = 1;
+
+                    if (distance < threshold) {
+                        const normalizedDist = 1 - (distance / threshold);
+                        // Subtle scaling factor (1.15 max instead of 1.35)
+                        scaleValue = 1 + (Math.pow(normalizedDist, 2) * 0.15);
+                    }
+                    
+                    item.style.transform = `scaleY(${scaleValue})`;
+                    
+                    // Apply inverse scale to the image so it doesn't stretch or zoom
+                    // Only the box (container) grew in height.
+                    const img = item.querySelector('img');
+                    if (img) {
+                        const inverseScale = 1 / scaleValue;
+                        img.style.transform = `scaleY(${inverseScale})`;
+                    }
+                });
+                requestAnimationFrame(updateMarqueeScaling);
+            }
+            updateMarqueeScaling();
         }
     });
 </script>

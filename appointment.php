@@ -26,7 +26,7 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 }
 if (!$phpmailer_available) {
     $try_paths = [
-        __DIR__ . '/includes/phpmailer/src',
+        __DIR__ . '/includes/PHPMailer',
         __DIR__ . '/includes/phpmailer',
         __DIR__ . '/includes/PHPMailer/src',
         __DIR__ . '/includes/phpmailer/src',
@@ -94,21 +94,25 @@ if (!empty($dbCfg) && !empty($dbCfg['host']) && !empty($dbCfg['name'])) {
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);
-        // create table if not exists
+        // create table if not exists (more comprehensive schema for Look Reservations)
         $pdo->exec("
-            CREATE TABLE IF NOT EXISTS appointments (
+            CREATE TABLE IF NOT EXISTS look_reservations (
                 id BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                category VARCHAR(100) DEFAULT NULL,
-                service VARCHAR(100) NOT NULL,
-                design TEXT,
-                appt_date DATE NOT NULL,
-                appt_time VARCHAR(64) NOT NULL,
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) NOT NULL,
-                phone VARCHAR(64) NOT NULL,
-                note TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE KEY unique_slot (appt_date, appt_time)
+                whatsapp VARCHAR(100) NOT NULL,
+                country VARCHAR(100) NOT NULL,
+                city VARCHAR(100) NOT NULL,
+                occasion VARCHAR(100) NOT NULL,
+                outfit_name VARCHAR(255) DEFAULT NULL,
+                outfit_description TEXT DEFAULT NULL,
+                delivery_date DATE NOT NULL,
+                size_type VARCHAR(50) NOT NULL,
+                standard_size VARCHAR(50) DEFAULT NULL,
+                measurements JSON DEFAULT NULL,
+                address JSON DEFAULT NULL,
+                notes TEXT DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
         ");
     } catch (Exception $e) {
@@ -116,7 +120,7 @@ if (!empty($dbCfg) && !empty($dbCfg['host']) && !empty($dbCfg['name'])) {
         $pdoErrorNote = $e->getMessage();
     }
 }
-$csvPath = __DIR__ . '/appointments_storage.csv';
+$csvPath = __DIR__ . '/look_reservations_storage.csv';
 
 // ----------------------
 // Process form
@@ -125,572 +129,1851 @@ $errors = [];
 $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['final_submit'])) {
-    $categorySlug = trim(strtolower($_POST['category'] ?? ''));
-    $categoryLabel = $categories[$categorySlug] ?? null;
-
-    $service = 'Custom Clothing';
-    $custom_service = trim($_POST['custom_service'] ?? '');
-    $date = trim($_POST['date'] ?? '');
-    $time = trim($_POST['time'] ?? '');
-    $name = trim($_POST['name'] ?? '');
+    // Extract new fields
+    $name = trim($_POST['full_name'] ?? '');
     $email = trim($_POST['email'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
-    $note = trim($_POST['note'] ?? '');
+    $whatsapp = trim(($_POST['country_code'] ?? '') . ' ' . ($_POST['whatsapp_number'] ?? ''));
+    $country = trim($_POST['country'] ?? '');
+    $city = trim($_POST['city'] ?? '');
+    $occasion = trim($_POST['occasion'] ?? '');
+    $outfit_name = trim($_POST['outfit_name'] ?? '');
+    $outfit_description = trim($_POST['outfit_description'] ?? '');
+    $delivery_date = trim($_POST['delivery_date'] ?? '');
+    $size_type = trim($_POST['size_type'] ?? '');
+    $standard_size = trim($_POST['standard_size'] ?? '');
+    
+    // Measurements
+    $measurements = [];
+    if (!empty($_POST['measure_bust'])) $measurements['Bust/Chest'] = $_POST['measure_bust'];
+    if (!empty($_POST['measure_waist'])) $measurements['Waist'] = $_POST['measure_waist'];
+    if (!empty($_POST['measure_hips'])) $measurements['Hips'] = $_POST['measure_hips'];
+    if (!empty($_POST['measure_shoulder'])) $measurements['Shoulder'] = $_POST['measure_shoulder'];
+    if (!empty($_POST['measure_length'])) $measurements['Length'] = $_POST['measure_length'];
+    if (!empty($_POST['measure_inseam'])) $measurements['Inseam'] = $_POST['measure_inseam'];
+
+    // Address
+    $address = [
+        'Flat/House' => $_POST['addr_flat'] ?? '',
+        'Street' => $_POST['addr_street'] ?? '',
+        'City' => $_POST['addr_city'] ?? '',
+        'State' => $_POST['addr_state'] ?? '',
+        'Pincode' => $_POST['addr_pincode'] ?? '',
+        'Country' => $_POST['addr_country'] ?? '',
+    ];
+
+    $notes = trim($_POST['notes'] ?? '');
 
     // basic validation
-    if ($categorySlug === '' || $categoryLabel === null) $errors[] = 'Please select a valid category.';
-    if ($custom_service === '') $errors[] = 'Please describe your custom clothing request (fabric, style, size, color).';
-    $dobj = DateTime::createFromFormat('Y-m-d', $date);
-    if (!$dobj) $errors[] = 'Please pick a valid date.';
-    else {
-        $d0 = (clone $dobj)->setTime(0,0,0);
-        $min = (new DateTime())->modify("+{$minDaysAhead} days")->setTime(0,0,0);
-        $max = (new DateTime())->modify("+{$maxDaysAhead} days")->setTime(0,0,0);
-        if ($d0 < $min || $d0 > $max) $errors[] = "Date must be between {$min->format('Y-m-d')} and {$max->format('Y-m-d')}.";
-    }
-    if ($time === '' || !in_array($time, $timeSlots, true)) $errors[] = 'Please choose a valid time slot.';
     if ($name === '') $errors[] = 'Please enter your name.';
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Please enter a valid email address.';
-    if ($phone === '') $errors[] = 'Please enter a phone number.';
+    if (trim($_POST['whatsapp_number'] ?? '') === '') $errors[] = 'Please enter a WhatsApp number.';
+    if ($delivery_date === '') $errors[] = 'Please pick a delivery date.';
 
     if (empty($errors)) {
-        $slotTaken = false;
-
-        // Try to insert (DB unique constraint protects double-booking)
+        // ----------------------
+        // SAVE TO DATABASE / CSV
+        // ----------------------
+        $savedToStorage = false;
         if ($pdo) {
             try {
-                $stmt = $pdo->prepare("INSERT INTO appointments
-                  (category, service, design, appt_date, appt_time, name, email, phone, note)
-                  VALUES (:category, :service, :design, :date, :time, :name, :email, :phone, :note)
+                $stmt = $pdo->prepare("INSERT INTO look_reservations 
+                    (name, email, whatsapp, country, city, occasion, outfit_name, outfit_description, delivery_date, size_type, standard_size, measurements, address, notes)
+                    VALUES (:name, :email, :whatsapp, :country, :city, :occasion, :outfit_name, :outfit_description, :delivery_date, :size_type, :standard_size, :measurements, :address, :notes)
                 ");
                 $stmt->execute([
-                    ':category' => $categoryLabel,
-                    ':service' => $service,
-                    ':design' => $custom_service,
-                    ':date' => $date,
-                    ':time' => $time,
                     ':name' => $name,
                     ':email' => $email,
-                    ':phone' => $phone,
-                    ':note' => $note,
+                    ':whatsapp' => $whatsapp,
+                    ':country' => $country,
+                    ':city' => $city,
+                    ':occasion' => $occasion,
+                    ':outfit_name' => $outfit_name,
+                    ':outfit_description' => $outfit_description,
+                    ':delivery_date' => $delivery_date,
+                    ':size_type' => $size_type,
+                    ':standard_size' => $standard_size,
+                    ':measurements' => json_encode($measurements),
+                    ':address' => json_encode($address),
+                    ':notes' => $notes,
                 ]);
-                $savedId = $pdo->lastInsertId();
-            } catch (PDOException $e) {
-                if ($e->getCode() === '23000' || stripos($e->getMessage(), 'Duplicate') !== false) {
-                    $slotTaken = true;
-                } else {
-                    $errors[] = 'Database error: ' . $e->getMessage();
-                }
-            }
-        } else {
-            // CSV fallback with exclusive lock
-            $lockFp = @fopen($csvPath, 'c+');
-            if ($lockFp === false) {
-                $errors[] = 'Unable to open storage file for bookings.';
-            } else {
-                try {
-                    if (!flock($lockFp, LOCK_EX)) {
-                        $errors[] = 'Unable to lock booking storage — try again.';
-                    } else {
-                        fseek($lockFp, 0);
-                        $found = false;
-                        while (($line = fgets($lockFp)) !== false) {
-                            $line = trim($line);
-                            if ($line === '') continue;
-                            $parts = str_getcsv($line);
-                            // CSV layout index: 2=date, 3=time in this fallback
-                            if (isset($parts[2]) && isset($parts[3])) {
-                                if ($parts[2] === $date && $parts[3] === $time) { $found = true; break; }
-                            }
-                        }
-                        if ($found) $slotTaken = true;
-                        else {
-                            $id = time() . rand(100,999);
-                            $created_at = (new DateTime())->format('c');
-                            $csvLine = [
-                                $id,
-                                $categoryLabel,
-                                $date,
-                                $time,
-                                $name,
-                                $email,
-                                $phone,
-                                $note,
-                                $created_at,
-                                $service,
-                                $custom_service
-                            ];
-                            fseek($lockFp, 0, SEEK_END);
-                            fwrite($lockFp, implode(',', array_map(function($v){
-                                return '"' . str_replace('"', '""', (string)$v) . '"';
-                            }, $csvLine)) . PHP_EOL);
-                            fflush($lockFp);
-                        }
-                        flock($lockFp, LOCK_UN);
-                    }
-                } finally {
-                    fclose($lockFp);
-                }
+                $savedToStorage = true;
+            } catch (Exception $e) {
+                // Log or handle error if needed, but we'll try CSV fallback or continue to email
             }
         }
 
-        if ($slotTaken) {
-            $errors[] = 'Sorry — that date and time slot has already been booked. Please choose a different slot.';
-        } else {
-            // send admin and user emails (adminRecipient from config)
-            $adminRecipient = $mailCfg['smtp_user'] ?? ($mailCfg['from_email'] ?? 'worldofinanna@gmail.com');
-
-            $detailsHtml = "<h2>New Appointment Booking — Custom Clothing</h2>";
-            $detailsHtml .= "<p><strong>Category:</strong> " . h($categoryLabel) . "</p>";
-            $detailsHtml .= "<p><strong>Design Description:</strong><br>" . nl2br(h($custom_service)) . "</p>";
-            $detailsHtml .= "<p><strong>Date:</strong> " . h($date) . "</p>";
-            $detailsHtml .= "<p><strong>Time:</strong> " . h($time) . "</p>";
-            $detailsHtml .= "<p><strong>Name:</strong> " . h($name) . "</p>";
-            $detailsHtml .= "<p><strong>Email:</strong> " . h($email) . "</p>";
-            $detailsHtml .= "<p><strong>Phone:</strong> " . h($phone) . "</p>";
-            $detailsHtml .= "<p><strong>Note:</strong><br/>" . nl2br(h($note)) . "</p>";
-
-            $userSubject = "Your appointment is confirmed — " . h($date) . " " . h($time);
-            $userHtml = "<h2>Your appointment is confirmed</h2>";
-            $userHtml .= "<p>Thanks <strong>" . h($name) . "</strong>, your appointment for <strong>Custom Clothing</strong> has been booked.</p>";
-            $userHtml .= $detailsHtml;
-            $userHtml .= "<p style='color:#6b7280;font-size:13px'>If you need to change or cancel, reply to this email.</p>";
-
-            $mailSentAdmin = false;
-            $mailSentUser = false;
-
-            if ($phpmailer_available) {
-                try {
-                    $m = new \PHPMailer\PHPMailer\PHPMailer(true);
-                    $m->isSMTP();
-                    $m->Host = $mailCfg['smtp_host'] ?? 'smtp.gmail.com';
-                    $m->SMTPAuth = true;
-                    $m->Username = $mailCfg['smtp_user'] ?? '';
-                    $m->Password = $mailCfg['smtp_pass'] ?? '';
-                    $secure = $mailCfg['smtp_secure'] ?? 'tls';
-                    if (!empty($secure)) $m->SMTPSecure = $secure;
-                    $m->Port = $mailCfg['smtp_port'] ?? 587;
-                    $m->CharSet = 'UTF-8';
-                    $m->Timeout = 30;
-
-                    $fromEmail = $mailCfg['from_email'] ?? $m->Username;
-                    $fromName  = $mailCfg['from_name'] ?? 'Inanna';
-
-                    // admin
-                    $m->setFrom($fromEmail, $fromName);
-                    $m->addAddress($adminRecipient);
-                    $m->addReplyTo($email, $name);
-                    $m->isHTML(true);
-                    $m->Subject = "New Appointment: Custom Clothing — {$date} {$time}";
-                    $m->Body = $detailsHtml;
-                    $m->AltBody = strip_tags($detailsHtml);
-                    $m->send();
-                    $mailSentAdmin = true;
-
-                    // user (new instance)
-                    $u = new \PHPMailer\PHPMailer\PHPMailer(true);
-                    $u->isSMTP();
-                    $u->Host = $mailCfg['smtp_host'] ?? 'smtp.gmail.com';
-                    $u->SMTPAuth = true;
-                    $u->Username = $mailCfg['smtp_user'] ?? '';
-                    $u->Password = $mailCfg['smtp_pass'] ?? '';
-                    if (!empty($secure)) $u->SMTPSecure = $secure;
-                    $u->Port = $mailCfg['smtp_port'] ?? 587;
-                    $u->CharSet = 'UTF-8';
-                    $u->Timeout = 30;
-                    $u->setFrom($fromEmail, $fromName);
-                    $u->addAddress($email, $name);
-                    $u->addReplyTo($adminRecipient);
-                    $u->isHTML(true);
-                    $u->Subject = $userSubject;
-                    $u->Body = $userHtml;
-                    $u->AltBody = strip_tags($userHtml);
-                    $u->send();
-                    $mailSentUser = true;
-                } catch (\PHPMailer\PHPMailer\Exception $pex) {
-                    $errors[] = 'PHPMailer error while sending emails: ' . $pex->getMessage();
-                } catch (\Exception $ex) {
-                    $errors[] = 'Mail sending error: ' . $ex->getMessage();
+        if (!$savedToStorage) {
+            // CSV fallback
+            $lockFp = @fopen($csvPath, 'a');
+            if ($lockFp) {
+                if (flock($lockFp, LOCK_EX)) {
+                    $csvLine = [
+                        date('Y-m-d H:i:s'),
+                        $name, $email, $whatsapp, $country, $city, $occasion,
+                        $outfit_name, $outfit_description, $delivery_date,
+                        $size_type, $standard_size, json_encode($measurements),
+                        json_encode($address), $notes
+                    ];
+                    fputcsv($lockFp, $csvLine);
+                    flock($lockFp, LOCK_UN);
+                    $savedToStorage = true;
                 }
-            } else {
-                $from = ($mailCfg['from_name'] ?? 'Inanna') . " <" . ($mailCfg['from_email'] ?? $adminRecipient) . ">";
-                $headers = "From: {$from}\r\nReply-To: {$adminRecipient}\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\n";
-                if (@mail($adminRecipient, "New Appointment: Custom Clothing — {$date} {$time}", $detailsHtml, $headers)) $mailSentAdmin = true;
-                else $errors[] = 'Unable to send admin email via mail().';
-                if (@mail($email, $userSubject, $userHtml, $headers)) $mailSentUser = true;
-                else $errors[] = 'Unable to send confirmation email to the user via mail().';
+                fclose($lockFp);
             }
-
-            if ($mailSentAdmin || $mailSentUser) $success = true;
         }
+
+        // ----------------------
+        // SEND EMAILS
+        // ----------------------
+        // Prepare email content
+        $adminRecipient = $mailCfg['admin_email'] ?? ($mailCfg['smtp_user'] ?? ($mailCfg['from_email'] ?? 'worldofinanna@gmail.com'));
+
+        $detailsHtml = "<h2>New Inanna Look Reservation</h2>";
+        $detailsHtml .= "<p><strong>Name:</strong> " . h($name) . "</p>";
+        $detailsHtml .= "<p><strong>Email:</strong> " . h($email) . "</p>";
+        $detailsHtml .= "<p><strong>WhatsApp:</strong> " . h($whatsapp) . "</p>";
+        $detailsHtml .= "<p><strong>Location:</strong> " . h($city) . ", " . h($country) . "</p>";
+        $detailsHtml .= "<hr>";
+        $detailsHtml .= "<p><strong>Occasion:</strong> " . h($occasion) . "</p>";
+        $detailsHtml .= "<p><strong>Outfit:</strong> " . h($outfit_name) . "</p>";
+        if ($outfit_description) {
+            $detailsHtml .= "<p><strong>Description:</strong><br>" . nl2br(h($outfit_description)) . "</p>";
+        }
+        $detailsHtml .= "<p><strong>Required By:</strong> " . h($delivery_date) . "</p>";
+        $detailsHtml .= "<hr>";
+        $detailsHtml .= "<p><strong>Size Type:</strong> " . h($size_type) . "</p>";
+        if ($size_type === 'standard' && $standard_size) {
+            $detailsHtml .= "<p><strong>Standard Size:</strong> " . h($standard_size) . "</p>";
+        } elseif ($size_type === 'custom' && !empty($measurements)) {
+            $detailsHtml .= "<h3>Measurements (inches):</h3><ul>";
+            foreach ($measurements as $label => $val) {
+                $detailsHtml .= "<li><strong>$label:</strong> " . h($val) . "</li>";
+            }
+            $detailsHtml .= "</ul>";
+        }
+        $detailsHtml .= "<hr>";
+        $detailsHtml .= "<h3>Delivery Address:</h3><p>";
+        foreach ($address as $label => $val) {
+            if ($val) $detailsHtml .= "<strong>$label:</strong> " . h($val) . "<br>";
+        }
+        $detailsHtml .= "</p>";
+        if ($notes) {
+            $detailsHtml .= "<p><strong>Additional Notes:</strong><br>" . nl2br(h($notes)) . "</p>";
+        }
+        
+        // Add file info if uploaded
+        if (isset($_FILES['outfit_image']) && $_FILES['outfit_image']['error'] === UPLOAD_ERR_OK) {
+            $detailsHtml .= "<p><strong>Attachment:</strong> Reference image included as attachment.</p>";
+        }
+
+        $userSubject = "Your Appointment Request is Confirmed - World of Inanna";
+        $userHtml = "<p>Hi " . h($name) . ",</p>";
+        $userHtml .= "<p>Your appointment request has been received.</p>";
+        $userHtml .= "<p>Our team will reach out to you on WhatsApp within 24 hours to confirm your slot, discuss pricing, and share next steps.</p>";
+        $userHtml .= "<p>Need to reschedule? Reply to this email or reach us at worldofinanna@gmail.com — free reschedule up to 24 hours before your slot.</p>";
+        $userHtml .= "<p>See you soon.</p>";
+        $userHtml .= "<p>— World of Inanna<br>worldofinanna.org</p>";
+
+        $mailSentAdmin = false;
+        $mailSentUser = false;
+
+        if ($phpmailer_available) {
+            try {
+                $m = new \PHPMailer\PHPMailer\PHPMailer(true);
+                // $m->SMTPDebug = 2; // Debug off for production
+                $m->isSMTP();
+                $m->Host = $mailCfg['smtp_host'] ?? 'smtp.gmail.com';
+                $m->SMTPAuth = true;
+                $m->Username = $mailCfg['smtp_user'] ?? '';
+                $m->Password = $mailCfg['smtp_pass'] ?? '';
+                $secure = $mailCfg['smtp_secure'] ?? 'tls';
+                if (!empty($secure)) $m->SMTPSecure = $secure;
+                $m->Port = $mailCfg['smtp_port'] ?? 587;
+                $m->CharSet = 'UTF-8';
+                $m->Timeout = 30;
+
+                $fromEmail = $mailCfg['from_email'] ?? $m->Username;
+                $fromName  = $mailCfg['from_name'] ?? 'Inanna';
+
+                // admin
+                $m->setFrom($fromEmail, $fromName);
+                $m->addAddress($adminRecipient);
+                $m->addReplyTo($email, $name);
+                $m->isHTML(true);
+                $m->Subject = "New Inanna Look Reservation: {$name}";
+                $m->Body = $detailsHtml;
+                $m->AltBody = strip_tags($detailsHtml);
+                
+                // Handle file attachment if uploaded
+                if (isset($_FILES['outfit_image']) && $_FILES['outfit_image']['error'] === UPLOAD_ERR_OK) {
+                    $m->addAttachment($_FILES['outfit_image']['tmp_name'], $_FILES['outfit_image']['name']);
+                }
+
+                $m->send();
+                $mailSentAdmin = true;
+
+                // user
+                $u = new \PHPMailer\PHPMailer\PHPMailer(true);
+                $u->isSMTP();
+                $u->Host = $mailCfg['smtp_host'] ?? 'smtp.gmail.com';
+                $u->SMTPAuth = true;
+                $u->Username = $mailCfg['smtp_user'] ?? '';
+                $u->Password = $mailCfg['smtp_pass'] ?? '';
+                if (!empty($secure)) $u->SMTPSecure = $secure;
+                $u->Port = $mailCfg['smtp_port'] ?? 587;
+                $u->CharSet = 'UTF-8';
+                $u->Timeout = 30;
+                $u->setFrom($fromEmail, $fromName);
+                $u->addAddress($email, $name);
+                $u->addReplyTo($adminRecipient);
+                $u->isHTML(true);
+                $u->Subject = $userSubject;
+                $u->Body = $userHtml;
+                $u->AltBody = strip_tags($userHtml);
+                $u->send();
+                $mailSentUser = true;
+            } catch (\PHPMailer\PHPMailer\Exception $pex) {
+                // $errors[] = 'PHPMailer error: ' . $pex->getMessage();
+            } catch (\Exception $ex) {
+                // $errors[] = 'Mail error: ' . $ex->getMessage();
+            }
+        } else {
+            $from = ($mailCfg['from_name'] ?? 'Inanna') . " <" . ($mailCfg['from_email'] ?? $adminRecipient) . ">";
+            $headers = "From: {$from}\r\nReply-To: {$adminRecipient}\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\n";
+            if (@mail($adminRecipient, "New Inanna Look Reservation: {$name}", $detailsHtml, $headers)) $mailSentAdmin = true;
+            if (@mail($email, $userSubject, $userHtml, $headers)) $mailSentUser = true;
+        }
+
+        // We consider success if either data was saved or mail was sent (best effort)
+        if ($savedToStorage || $mailSentAdmin || $mailSentUser) $success = true;
     }
 }
 
 // Attempt to include header/footer if they exist (keeps design)
+$header_class = 'navbar-light-bg';
 $headerPath = __DIR__ . '/includes/header.php';
 if (file_exists($headerPath)) include $headerPath;
 ?>
 
 <!-- ---------- DESIGN/CSS from your preferred layout (keeps structure + visuals) ---------- -->
 <style>
-:root{
-  --bg1: #fffaf0; /* warm parchment */
-  --bg2: #f3f7ff;
-  --accent:#c026d3;
-  --accent-2:#f97316;
-  --muted:#6b7280;
-  --card:#ffffff;
-  --shadow: 0 14px 40px rgba(16,24,40,0.08);
-}
-body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;color:#0f172a;background: linear-gradient(180deg, #1a1a1d, #272330, #332f45);margin:0;padding-top:var(--top-offset,0px)}
-.container-appt{max-width:1040px;margin:28px auto;padding:18px}
-.bespoke-card{background:var(--card);border-radius:18px;padding:28px;box-shadow:var(--shadow);position:relative;overflow:visible}
-.top-bar{display:flex;gap:16px;align-items:center;margin-bottom:18px}
-.logo-patch{display:flex;flex-wrap:wrap; align-items:center;gap:12px}
-.logo-mark{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;box-shadow:0 6px 18px rgba(192,38,211,0.12)}
-.title h1{margin:0;font-size:22px}
-.title p{margin:4px 0 0;color:var(--muted)}
-.main-grid{display:grid;grid-template-columns:1fr 380px;gap:28px;align-items:start}
-@media(max-width:980px){.main-grid{grid-template-columns:1fr}}
-.form-area{padding:6px 0}
-.panel{background:linear-gradient(180deg,#fff,#fbfdff);border-radius:12px;padding:18px;border:1px solid #f1f5f9;margin-bottom:18px}
-.label-hero{display:flex;justify-content:space-between;align-items:center}
-.heading{font-weight:700;margin:0 0 6px}
-.sub{color:var(--muted);font-size:13px;margin:0}
-.field{margin-top:12px}
-label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-textarea, input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select{
-  width:100%;padding:12px;border-radius:10px;border:1px dashed #f1e6ff;background:#fff;font-size:14px;outline:none;transition:all .12s;
-}
-textarea{min-height:140px;resize:vertical;border-radius:12px}
-input:focus,textarea:focus,select:focus{box-shadow:0 10px 30px rgba(192,38,211,0.06);border-color:rgba(192,38,211,0.2)}
-.small{font-size:13px;color:var(--muted);margin-top:6px}
-.design-box{border:1px solid #f0e7f9;padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fffaf8)}
-.design-area{display:flex;gap:12px;align-items:flex-start}
-.sketch{width:84px;height:84px;border-radius:10px;background:linear-gradient(135deg,#fff6f0,#fff0ff);display:flex;align-items:center;justify-content:center;border:1px solid #fde8d9}
-.sketch svg{width:54px;height:54px;opacity:0.95}
-.time-select{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.slot{padding:8px 10px;border-radius:10px;border:1px solid #f1f3f5;background:#fff;cursor:pointer;font-weight:700;font-size:13px}
-.slot.selected{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(192,38,211,0.12)}
-.actions{display:flex;justify-content:space-between;gap:12px;margin-top:18px}
-.btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;padding:12px 16px;border-radius:12px;border:0;font-weight:800;cursor:pointer}
-.btn-ghost{background:transparent;border:1px solid #f1f3f5;padding:10px 14px;border-radius:12px;cursor:pointer;color:var(--muted)}
-.info-card{background:linear-gradient(180deg,#fff,#fcfbff);border-radius:12px;padding:18px;border:1px solid #f1f3f9}
-.info-card h3{margin:0 0 8px}
-.info-card p{margin:0;color:var(--muted)}
-.error{background:#fff2f3;color:#7f1d1d;padding:10px;border-radius:8px;margin-bottom:12px}
-.success{background:#eefcf3;color:#065f46;padding:10px;border-radius:8px;margin-bottom:12px}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  :root {
+    --cream: #F7F1E8;
+    --warm-white: #FDF9F4;
+    --clay: #C4825A;
+    --deep: #1A1208;
+    --gold: #B8956A;
+    --muted: #8A7A6A;
+    --border: #E0D5C5;
+    --input-bg: #FEFCF9;
+  }
+ 
+  body {
+    background-color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--deep);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+ 
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C4825A' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+ 
+  .appoint-page-layout {
+    position: relative;
+    z-index: 1;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 120px 24px 80px;
+  }
+
+  .appoint-content-grid {
+    display: flex;
+    gap: 48px;
+    align-items: flex-start;
+  }
+
+  .appoint-form-container {
+    flex: 1;
+    min-width: 0;
+    max-width: 680px;
+  }
+
+  /* Sidebar */
+  .appoint-sidebar {
+    flex: 0 0 280px;
+    position: sticky;
+    top: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .appoint-sidebar-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px 22px;
+  }
+
+  .appoint-sidebar-section {
+    margin-bottom: 22px;
+    padding-bottom: 22px;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .appoint-sidebar-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .appoint-sidebar-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .appoint-sidebar-body {
+    font-size: 13px;
+    color: var(--deep);
+    line-height: 1.75;
+  }
+
+  .appoint-sidebar-body strong {
+    font-weight: 500;
+  }
+
+  .appoint-sidebar-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 13px;
+    color: var(--deep);
+    line-height: 1.9;
+  }
+
+  .appoint-sidebar-list li::before {
+    content: "✦";
+    color: var(--gold);
+    font-size: 9px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .appoint-sidebar-hours {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .appoint-hours-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--deep);
+  }
+
+  .appoint-hours-row span:first-child { color: var(--muted); }
+
+  .appoint-sidebar-link {
+    color: var(--clay);
+    text-decoration: none;
+    font-size: 13px;
+  }
+
+  .appoint-sidebar-link:hover { text-decoration: underline; }
+
+  .appoint-sidebar-note {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .appoint-content-grid {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .appoint-sidebar {
+      position: static;
+      flex: none;
+      order: 1; /* Below header, before form */
+      margin-bottom: 40px;
+    }
+    .appoint-form-container { 
+      max-width: 100%; 
+      order: 2;
+    }
+  }
+
+  /* Header */
+  .appoint-header {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 56px;
+    animation: fadeUp 0.8s ease both;
+  }
+ 
+  .appoint-inline-logo {
+    height: 1.2em;
+    width: auto;
+    vertical-align: middle;
+    margin-top: -0.2em;
+    display: inline-block;
+  }
+ 
+  .appoint-brand-logo {
+    height: 64px;
+    width: auto;
+    margin-bottom: 24px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+ 
+  .appoint-brand-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 20px;
+    display: block;
+  }
+ 
+  .appoint-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(42px, 8vw, 64px);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--deep);
+    margin-bottom: 8px;
+  }
+ 
+  .appoint-header h1 em {
+    font-style: italic;
+    color: var(--clay);
+  }
+ 
+  .appoint-header p {
+    font-size: 18px;
+    color: var(--muted);
+    font-weight: 300;
+    margin-top: 16px;
+    line-height: 1.7;
+  }
+ 
+  .appoint-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 32px auto;
+    max-width: 200px;
+  }
+ 
+  .appoint-divider::before, .appoint-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+ 
+  .appoint-divider-icon {
+    color: var(--gold);
+    font-size: 16px;
+  }
+ 
+  .appoint-header-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(18px, 3vw, 22px);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--clay);
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+ 
+  .appoint-header-body {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+ 
+  .appoint-header-note {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+  }
+ 
+  /* Form card */
+  .appoint-form-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 48px 40px;
+    box-shadow: 0 8px 40px rgba(26,18,8,0.06), 0 2px 8px rgba(26,18,8,0.04);
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+ 
+  @media (max-width: 520px) {
+    .appoint-form-card { padding: 32px 24px; }
+  }
+ 
+  /* Field groups */
+  .appoint-field-group {
+    margin-bottom: 32px;
+  }
+ 
+  .appoint-field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--deep);
+    margin-bottom: 6px;
+  }
+ 
+  .appoint-field-hint {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    margin-bottom: 10px;
+    display: block;
+  }
+ 
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 14px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--deep);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+ 
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="tel"]:focus,
+  input[type="date"]:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--clay);
+    box-shadow: 0 0 0 3px rgba(196,130,90,0.1);
+  }
+ 
+  input::placeholder, textarea::placeholder {
+    color: #C5B9A8;
+    font-style: italic;
+  }
+ 
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A7A6A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+    cursor: pointer;
+  }
+ 
+  textarea {
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.6;
+  }
+ 
+  /* Radio / Size options */
+  .appoint-size-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+ 
+  .appoint-size-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--input-bg);
+    transition: border-color 0.2s, background 0.2s;
+  }
+ 
+  .appoint-size-option:hover {
+    border-color: var(--clay);
+    background: #FEF8F3;
+  }
+ 
+  .appoint-size-option input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--clay);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+ 
+  .appoint-size-option input[type="radio"]:checked + .appoint-size-label {
+    color: var(--clay);
+  }
+ 
+  .appoint-size-option:has(input:checked) {
+    border-color: var(--clay);
+    background: #FEF8F3;
+  }
+ 
+  .appoint-size-label {
+    font-size: 14px;
+    color: var(--deep);
+    transition: color 0.2s;
+  }
+ 
+  /* Section separator */
+  .appoint-section-sep {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 36px 0;
+  }
+ 
+  /* File upload */
+  .appoint-upload-area {
+    border: 1.5px dashed var(--border);
+    border-radius: 2px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--input-bg);
+    margin-top: 10px;
+  }
+ 
+  .appoint-upload-area:hover {
+    border-color: var(--clay);
+    background: #FEF8F3;
+  }
+ 
+  .appoint-upload-area input { display: none; }
+ 
+  .appoint-upload-icon { font-size: 24px; margin-bottom: 8px; display: block; }
+ 
+  .appoint-upload-text {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+  }
+ 
+  .appoint-upload-text strong {
+    color: var(--clay);
+    font-weight: 400;
+    font-style: normal;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+ 
+  #appoint-file-name {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--clay);
+    font-style: italic;
+  }
+ 
+  /* Submit button */
+  .appoint-submit-wrap {
+    margin-top: 40px;
+    text-align: center;
+  }
+ 
+  .appoint-submit-btn {
+    background: var(--deep);
+    color: var(--cream);
+    border: none;
+    padding: 18px 56px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.25s, transform 0.15s, box-shadow 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+ 
+  .appoint-submit-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--clay);
+    transform: translateX(-100%);
+    transition: transform 0.35s ease;
+    z-index: 0;
+  }
+ 
+  .appoint-submit-btn:hover::after { transform: translateX(0); }
+ 
+  .appoint-submit-btn span {
+    position: relative;
+    z-index: 1;
+  }
+ 
+  .appoint-submit-btn:hover {
+    box-shadow: 0 8px 24px rgba(196,130,90,0.3);
+    transform: translateY(-1px);
+  }
+ 
+  .appoint-submit-btn:active { transform: translateY(0); }
+ 
+  .appoint-submit-note {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 14px;
+  }
+ 
+  /* Success state */
+  .appoint-success-msg {
+    display: none;
+    text-align: center;
+    padding: 48px 24px;
+    animation: fadeUp 0.5s ease both;
+  }
+ 
+  .appoint-success-msg.show { display: block; }
+ 
+  .appoint-success-icon { font-size: 40px; margin-bottom: 16px; }
+ 
+  .appoint-success-msg h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 300;
+    color: var(--deep);
+    margin-bottom: 12px;
+  }
+ 
+  .appoint-success-msg p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+ 
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+ 
+  .appoint-field-group {
+    animation: fadeUp 0.6s ease both;
+  }
+ 
+  .appoint-field-group:nth-child(1) { animation-delay: 0.1s; }
+  .appoint-field-group:nth-child(2) { animation-delay: 0.15s; }
+  .appoint-field-group:nth-child(3) { animation-delay: 0.2s; }
+  .appoint-field-group:nth-child(4) { animation-delay: 0.25s; }
+  .appoint-field-group:nth-child(5) { animation-delay: 0.3s; }
+  .appoint-field-group:nth-child(6) { animation-delay: 0.35s; }
+  .appoint-field-group:nth-child(7) { animation-delay: 0.4s; }
+  .appoint-field-group:nth-child(8) { animation-delay: 0.45s; }
+ 
+  /* Size Chart */
+  .appoint-size-chart-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--clay);
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+ 
+  .appoint-size-chart-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,18,8,0.6);
+    z-index: 100;
+    overflow-y: auto;
+    padding: 24px 16px;
+    backdrop-filter: blur(4px);
+  }
+ 
+  .appoint-size-chart-modal.open { display: flex; align-items: flex-start; justify-content: center; }
+ 
+  .appoint-size-chart-inner {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    max-width: 720px;
+    width: 100%;
+    padding: 40px 32px;
+    position: relative;
+    animation: fadeUp 0.3s ease both;
+    margin: auto;
+  }
+ 
+  .appoint-size-chart-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--muted);
+    background: none;
+    border: none;
+    line-height: 1;
+    font-family: 'DM Sans', sans-serif;
+  }
+ 
+  .appoint-size-chart-close:hover { color: var(--deep); }
+ 
+  .appoint-size-chart-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--deep);
+    margin-bottom: 4px;
+  }
+ 
+  .appoint-size-chart-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    letter-spacing: 0.05em;
+  }
+ 
+  .appoint-size-chart-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+ 
+  .appoint-size-tab {
+    padding: 10px 24px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+ 
+  .appoint-size-tab.active {
+    color: var(--clay);
+    border-bottom-color: var(--clay);
+  }
+ 
+  .appoint-size-chart-body { display: none; }
+  .appoint-size-chart-body.active { display: block; }
+ 
+  .appoint-body-figure-wrap {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+ 
+  .appoint-body-figure {
+    flex: 0 0 120px;
+    text-align: center;
+  }
+ 
+  .appoint-body-figure svg {
+    width: 100px;
+    height: auto;
+    display: block;
+    margin: 0 auto 8px;
+  }
+ 
+  .appoint-body-figure-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+ 
+  .appoint-measure-list {
+    flex: 1;
+    min-width: 200px;
+  }
+ 
+  .appoint-measure-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+ 
+  .appoint-measure-item:last-child { border-bottom: none; }
+  .appoint-measure-name { color: var(--muted); }
+  .appoint-measure-where { color: var(--deep); font-weight: 500; }
+ 
+  .appoint-size-table-wrap { overflow-x: auto; }
+ 
+  table.appoint-size-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+ 
+  .appoint-size-table th {
+    background: var(--deep);
+    color: var(--cream);
+    padding: 10px 14px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+ 
+  .appoint-size-table td {
+    padding: 10px 14px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    color: var(--deep);
+  }
+ 
+  .appoint-size-table tr:nth-child(even) td { background: #FAF6F0; }
+  .appoint-size-table tr:hover td { background: #FEF3EA; }
+ 
+  .appoint-size-table td:first-child {
+    font-weight: 600;
+    color: var(--clay);
+    letter-spacing: 0.08em;
+  }
+ 
+  .appoint-size-note {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+ 
+ 
+  /* Enhanced Size Section */
+  .appoint-size-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+ 
+  @media (max-width: 480px) {
+    .appoint-size-cards { grid-template-columns: 1fr; }
+  }
+ 
+  .appoint-size-card {
+    position: relative;
+    cursor: pointer;
+  }
+ 
+  .appoint-size-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+ 
+  .appoint-size-card-inner {
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    padding: 18px 14px;
+    text-align: center;
+    background: var(--input-bg);
+    transition: all 0.2s ease;
+    height: 100%;
+  }
+ 
+  .appoint-size-card:hover .appoint-size-card-inner {
+    border-color: var(--clay);
+    background: #FEF8F3;
+  }
+ 
+  .appoint-size-card input:checked ~ .appoint-size-card-inner {
+    border-color: var(--clay);
+    background: #FEF3EA;
+    box-shadow: 0 0 0 3px rgba(196,130,90,0.12);
+  }
+ 
+  .appoint-size-card-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+  }
+ 
+  .appoint-size-card-title {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--deep);
+    margin-bottom: 6px;
+    display: block;
+  }
+ 
+  .appoint-size-card-desc {
+    font-size: 11.5px;
+    color: var(--muted);
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+ 
+  .appoint-size-card input:checked ~ .appoint-size-card-inner .appoint-size-card-title {
+    color: var(--clay);
+  }
+ 
+  /* Custom measurements reveal */
+  .appoint-custom-measurements {
+    display: none;
+    margin-top: 20px;
+    border: 1.5px solid var(--clay);
+    border-radius: 4px;
+    padding: 24px;
+    background: #FEF8F3;
+    animation: fadeUp 0.3s ease both;
+  }
+ 
+  .appoint-custom-measurements.visible { display: block; }
+ 
+  .appoint-custom-measurements-title {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--deep);
+    margin-bottom: 4px;
+  }
+ 
+  .appoint-custom-measurements-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+ 
+  .appoint-measurements-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+ 
+  @media (max-width: 480px) {
+    .appoint-measurements-grid { grid-template-columns: 1fr; }
+  }
+ 
+  .appoint-measurement-field label {
+    display: block;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--deep);
+    margin-bottom: 5px;
+  }
+ 
+  .appoint-measurement-field input {
+    width: 100%;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 10px 12px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 13px;
+    color: var(--deep);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+ 
+  .appoint-measurement-field input:focus {
+    border-color: var(--clay);
+    box-shadow: 0 0 0 2px rgba(196,130,90,0.1);
+  }
+ 
+  .appoint-measurement-field input::placeholder {
+    color: #C5B9A8;
+    font-style: italic;
+  }
+ 
+  .appoint-gender-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+ 
+  .appoint-gender-btn {
+    flex: 1;
+    padding: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    background: white;
+    color: var(--muted);
+    font-family: "DM Sans", sans-serif;
+    transition: all 0.2s;
+  }
+ 
+  .appoint-gender-btn.active {
+    border-color: var(--clay);
+    background: var(--clay);
+    color: white;
+  }
+ 
+  /* Standard size dropdown reveal */
+  .appoint-standard-size-select {
+    display: none;
+    margin-top: 20px;
+    animation: fadeUp 0.3s ease both;
+  }
+ 
+  .appoint-standard-size-select.visible { display: block; }
+ 
+  .appoint-size-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+  }
+ 
+  @media (max-width: 480px) {
+    .appoint-size-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+ 
+  .appoint-size-bubble {
+    text-align: center;
+    cursor: pointer;
+  }
+ 
+  .appoint-size-bubble input[type="radio"] {
+    display: none;
+  }
+ 
+  .appoint-size-bubble-label {
+    display: block;
+    padding: 10px 4px;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--deep);
+    background: white;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+ 
+  .appoint-size-bubble input:checked + .appoint-size-bubble-label {
+    border-color: var(--clay);
+    background: var(--clay);
+    color: white;
+  }
+ 
+  .appoint-size-bubble:hover .appoint-size-bubble-label {
+    border-color: var(--clay);
+    color: var(--clay);
+  }
+ 
+ 
+  /* Phone with country code */
+  .appoint-phone-row {
+    display: flex;
+    gap: 10px;
+  }
+ 
+  .appoint-country-code-select {
+    flex: 0 0 140px;
+  }
+ 
+  .appoint-phone-input-wrap { flex: 1; }
+ 
+  /* Two column grid for address */
+  .appoint-address-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+ 
+  @media (max-width: 480px) {
+    .appoint-address-grid { grid-template-columns: 1fr; }
+    .appoint-country-code-select { flex: 0 0 120px; }
+    .appoint-header h1 {font-size: clamp(38px, 8vw, 64px);}
+  }
+
+  
+ 
+  .appoint-address-grid .appoint-full-width { grid-column: 1 / -1; }
+ 
+  /* Outfit tabs */
+  .appoint-outfit-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+ 
+  .appoint-outfit-tab-btn {
+    flex: 1;
+    padding: 9px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    background: var(--input-bg);
+    color: var(--muted);
+    font-family: "DM Sans", sans-serif;
+    transition: all 0.2s;
+  }
+ 
+  .appoint-outfit-tab-btn.active {
+    border-color: var(--clay);
+    color: var(--clay);
+    background: #FEF3EA;
+  }
+ 
+  .appoint-outfit-tab-panel { display: none; }
+  .appoint-outfit-tab-panel.active { display: block; }
+ 
 </style>
+</head>
+<body>
+ 
+<div class="appoint-page-layout">
+ 
+  <!-- Header -->
+  <div class="appoint-header">
+    <h1>Book Your <em><img src="https://worldofinanna.org/assets/images/logo-inanna.avif" alt="Inanna" class="appoint-inline-logo"> Look.</em></h1>
+    <div class="appoint-divider"><span class="appoint-divider-icon">✦</span></div>
+    <p class="appoint-header-tagline"><img src="https://worldofinanna.org/assets/images/logo-inanna.avif" alt="Inanna" class="appoint-inline-logo" style="height: 1em;"> isn't off-the-rack.</p>
+    <p class="appoint-header-body">Leave your details and we'll tailor the experience to you.</p>
+    <p class="appoint-header-note">We respond within 24 hours.</p>
+  </div>
 
-<div class="container-appt">
-  <div class="bespoke-card">
-    <div class="top-bar">
-      <div class="logo-patch">
-        <div class="logo-mark">IN</div>
-        <div class="title">
-          <h1>Inanna Bespoke — Custom Clothing</h1>
-          <p>Create your garment. We'll translate your idea into a tailored appointment.</p>
+  <div class="appoint-content-grid">
+    <!-- Sidebar -->
+    <aside class="appoint-sidebar">
+      <div class="appoint-sidebar-card">
+        <div class="appoint-sidebar-section">
+          <span class="appoint-sidebar-label">Opening Hours</span>
+          <div class="appoint-sidebar-hours">
+            <div class="appoint-hours-row"><span>Mon — Sat</span><span>9:00 — 18:00</span></div>
+            <div class="appoint-hours-row"><span>Sunday</span><span>Closed</span></div>
+          </div>
+        </div>
+
+        <div class="appoint-sidebar-section">
+          <span class="appoint-sidebar-label">Location</span>
+          <p class="appoint-sidebar-body">Studio Inanna<br>Jhajra, Dehradun 248007</p>
+        </div>
+
+        <div class="appoint-sidebar-section">
+          <span class="appoint-sidebar-label">Quick Facts</span>
+          <ul class="appoint-sidebar-list">
+            <li>45-min appointments</li>
+            <li>Fittings by appointment</li>
+            <li>Appointments online only</li>
+          </ul>
+        </div>
+
+        <div class="appoint-sidebar-section">
+          <span class="appoint-sidebar-label">Prepare for Your Appointment</span>
+          <ul class="appoint-sidebar-list">
+            <li>Bring reference images or links</li>
+            <li>Know your usual sizes (chest / waist / hips / height)</li>
+            <li>If fabric is available, bring a swatch</li>
+          </ul>
+        </div>
+
+        <div class="appoint-sidebar-section">
+          <span class="appoint-sidebar-label">Cancellation & Reschedule</span>
+          <p class="appoint-sidebar-body">Free reschedule up to 24 hours before your slot.</p>
+          <p class="appoint-sidebar-note">To cancel or change, reply to your confirmation email.</p>
         </div>
       </div>
-      <div style="margin-left:auto;color:var(--muted);font-size:13px;">
-        Bookings are emailed to <strong><?php echo h($mailCfg['smtp_user'] ?? 'worldofinanna@gmail.com'); ?></strong>
+    </aside>
+
+    <div class="appoint-form-container">
+      <div class="appoint-form-card">
+        <?php if (!empty($errors)): ?>
+          <div class="appoint-error" style="background:#fff2f3;color:#7f1d1d;padding:10px;border-radius:8px;margin-bottom:12px"><?php echo implode('<br>', array_map('h', $errors)); ?></div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="appoint-success-msg show" id="appoint-success-msg">
+          <div class="appoint-success-icon">✦</div>
+          <h2>Your look is reserved.</h2>
+          <p>We've received your request and will reach out<br>on WhatsApp within 24–48 hours.<br><br>Get ready — something beautiful is coming.</p>
+        </div>
+        <style>#appoint-booking-form { display: none; }</style>
+        <?php else: ?>
+          <form id="appoint-booking-form" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="final_submit" value="1">
+ 
+      <!-- Full Name -->
+      <div class="appoint-field-group">
+        <label class="appoint-field-label" for="appoint-full-name">Full Name</label>
+        <span class="appoint-field-hint">So we know who we're dressing.</span>
+        <input type="text" id="appoint-full-name" name="full_name" placeholder="Your name here" required>
       </div>
-    </div>
-
-    <?php if (!empty($errors)): ?>
-      <div class="error"><?php echo implode('<br>', array_map('h', $errors)); ?></div>
-    <?php endif; ?>
-    <?php if ($success): ?>
-      <div class="success">Thanks — your appointment request was sent successfully. We'll reply soon.</div>
-    <?php endif; ?>
-
-    <div class="main-grid">
-      <!-- LEFT: form -->
-      <div class="form-area">
-        <form method="post" id="apptForm" novalidate>
-          <!-- Design / Service block -->
-          <div class="panel design-box">
-            <div class="label-hero">
-              <div>
-                <div class="heading">Service: <span style="color:var(--accent);">Custom Clothing</span></div>
-                <div class="sub">Only one service — describe your clothing design in detail</div>
-              </div>
-              <div class="small">45 min slots · 9:00–17:45</div>
-            </div>
-
-            <div class="design-area" style="margin-top:12px">
-              <div class="sketch" aria-hidden="true">
-                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 44c0-8 8-12 14-12s8 6 14 6 12-6 18-6" stroke="#c026d3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M18 18c0 6 6 10 14 10s14-4 14-10" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="32" cy="10" r="3" fill="#c026d3"/>
-                </svg>
-              </div>
-              <div style="flex:1">
-                <label for="category">Category</label>
-
-                <!-- Category select (uses slugs as values). -->
-                <select id="category" name="category" required class="styled-select">
-                  <option value="" disabled <?php echo (old('category') === '') ? 'selected' : ''; ?>>-- choose category --</option>
-                  <?php foreach ($categories as $slug => $label): ?>
-                    <option value="<?php echo h($slug); ?>" <?php echo (old('category') === $slug) ? 'selected' : ''; ?>><?php echo h($label); ?></option>
-                  <?php endforeach; ?>
-                </select>
-
-                <label for="custom_service" style="margin-top:12px">Describe your design (fabric, cut, measurements, color, reference links)</label>
-                <textarea id="custom_service" name="custom_service" placeholder="Example: Silk kurta, A-line, ivory with hand-embroidered neckline, size M..."><?php echo old('custom_service'); ?></textarea>
-                <div class="small">Tip: include measurements or upload links to reference images in the notes below.</div>
-              </div>
-            </div>
+ 
+      <!-- WhatsApp -->
+      <div class="appoint-field-group">
+        <label class="appoint-field-label">WhatsApp Number</label>
+        <span class="appoint-field-hint">Where we'll send pricing & details.</span>
+        <div class="appoint-phone-row">
+          <div class="appoint-country-code-select">
+            <select name="country_code" required>
+              <option value="" disabled selected>Country</option>
+              <option value="+91">🇮🇳 +91 India</option>
+              <option value="+1">🇺🇸 +1 USA</option>
+              <option value="+44">🇬🇧 +44 UK</option>
+              <option value="+971">🇦🇪 +971 UAE</option>
+              <option value="+61">🇦🇺 +61 Australia</option>
+              <option value="+65">🇸🇬 +65 Singapore</option>
+              <option value="+60">🇲🇾 +60 Malaysia</option>
+              <option value="+1-CA">🇨🇦 +1 Canada</option>
+              <option value="+49">🇩🇪 +49 Germany</option>
+              <option value="+33">🇫🇷 +33 France</option>
+              <option value="+39">🇮🇹 +39 Italy</option>
+              <option value="+81">🇯🇵 +81 Japan</option>
+              <option value="+82">🇰🇷 +82 South Korea</option>
+              <option value="+92">🇵🇰 +92 Pakistan</option>
+              <option value="+880">🇧🇩 +880 Bangladesh</option>
+              <option value="+94">🇱🇰 +94 Sri Lanka</option>
+              <option value="+977">🇳🇵 +977 Nepal</option>
+              <option value="+other">🌍 Other</option>
+            </select>
           </div>
-
-          <!-- Date & time panel -->
-          <div class="panel">
-            <div class="heading" style="font-size:16px">Choose date & time</div>
-            <div class="small" style="margin-top:6px">Pick a convenient date and one of the 45-minute slots.</div>
-
-            <div class="field" style="margin-top:12px">
-              <label for="date">Appointment date</label>
-              <input type="date" id="date" name="date" min="<?php echo h($minDate); ?>" max="<?php echo h($maxDate); ?>" value="<?php echo old('date'); ?>" required>
-            </div>
-
-            <div class="field">
-              <label for="time">Time slot</label>
-              <select id="time" name="time" required>
-                <option value="">-- choose a time --</option>
-                <?php foreach ($timeSlots as $s): ?>
-                  <option value="<?php echo h($s); ?>" <?php echo (old('time')===$s)?'selected':''; ?>><?php echo h($s); ?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
+          <div class="appoint-phone-input-wrap">
+            <input type="tel" id="appoint-whatsapp" name="whatsapp_number" placeholder="00000 00000" required>
           </div>
-
-          <!-- Details panel -->
-          <div class="panel">
-            <div class="heading" style="font-size:16px">Your details</div>
-
-            <div class="field">
-              <label for="name">Full name</label>
-              <input id="name" name="name" type="text" value="<?php echo old('name'); ?>" required>
-            </div>
-
-            <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-              <div class="field">
-                <label for="email">Email</label>
-                <input id="email" name="email" type="email" value="<?php echo old('email'); ?>" required>
-              </div>
-              <div class="field">
-                <label for="phone">Phone</label>
-                <input id="phone" name="phone" type="tel" value="<?php echo old('phone'); ?>" required>
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="note">Notes or reference URLs (optional)</label>
-              <textarea id="note" name="note" placeholder="Add image links, sizing notes, or other info"><?php echo old('note'); ?></textarea>
-            </div>
-
-            <div class="actions">
-              <button type="button" class="btn-ghost" onclick="resetForm()">Reset</button>
-              <button type="submit" name="final_submit" class="btn-primary">Confirm appointment</button>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <!-- RIGHT: info and mini-preview -->
-      <aside class="info-card" aria-labelledby="info-heading">
-  <h3 id="info-heading">What to expect</h3>
-
-  <p style="margin-top:8px;color:var(--muted)">
-    You'll receive an email with the booking details and a confirmation copy. At your appointment we will inspect fabric, take measurements, confirm the design & timeline. Paste reference image links in the notes field or email them to us beforehand.
-  </p>
-
-  <div style="margin-top:14px;display:flex;gap:12px;align-items:flex-start">
-    <div style="flex:1">
-      <strong>Opening hours</strong>
-      <div class="small" style="margin-top:6px;color:var(--muted)">
-        Mon — Sat: 9:00 — 18:00<br>
-        Sun: Closed
-      </div>
-
-      <div style="margin-top:12px">
-        <strong>Location</strong>
-        <div class="small" style="margin-top:6px;color:var(--muted)">
-          Studio Inanna — Jhajra, Dehradun 248007
         </div>
       </div>
-    </div>
-
-    <div style="width:110px;text-align:center">
-      <strong>Quick facts</strong>
-      <div class="small" style="margin-top:6px;color:var(--muted);text-align:left">
-        • 45-min appointments<br>
-        • Fittings by appointment<br>
-        • Appointments online only
+ 
+      <!-- Email -->
+      <div class="appoint-field-group">
+        <label class="appoint-field-label" for="appoint-email">Email Address</label>
+        <span class="appoint-field-hint">For your booking confirmation.</span>
+        <input type="email" id="appoint-email" name="email" placeholder="you@example.com" required>
       </div>
-    </div>
-  </div>
-
-  <hr style="border:none;border-top:1px solid #f1f3f7;margin:12px 0;">
-
-  <div>
-    <strong>Prepare for your appointment</strong>
-    <ul style="margin:8px 0 0 18px;color:var(--muted);font-size:13px;line-height:1.45">
-      <li>Bring reference images or links (paste in notes).</li>
-      <li>Know your usual sizes (chest/waist/hips/height).</li>
-      <li>If fabric is available, bring a swatch—otherwise we’ll recommend options.</li>
-    </ul>
-  </div>
-
-  <div style="margin-top:12px">
-    <strong>Cancellation & reschedule</strong>
-    <div class="small" style="margin-top:6px;color:var(--muted)">
-      Free reschedule up to <strong>24 hours</strong> before your slot. To cancel or change, reply to your confirmation email or contact us at <a href="mailto:<?php echo h($mailCfg['smtp_user'] ?? 'worldofinanna@gmail.com'); ?>" style="color:inherit;text-decoration:underline;"><?php echo h($mailCfg['smtp_user'] ?? 'worldofinanna@gmail.com'); ?></a>.
-    </div>
-  </div>
-
-  <hr style="border:none;border-top:1px solid #f1f3f7;margin:12px 0;">
-
-  <div>
-    <strong>Frequently asked</strong>
-    <details style="margin-top:8px;color:var(--muted);font-size:13px">
-      <summary style="cursor:pointer;font-weight:700">How long does a custom piece take?</summary>
-      <div style="margin-top:6px">Typically 1–3 weeks depending on fabric & complexity. We’ll confirm during your appointment.</div>
-    </details>
-
-    <details style="margin-top:8px;color:var(--muted);font-size:13px">
-      <summary style="cursor:pointer;font-weight:700">Can I bring my own fabric?</summary>
-      <div style="margin-top:6px">Yes—bring a swatch so we can advise exact quantities and suitability.</div>
-    </details>
-
-    <details style="margin-top:8px;color:var(--muted);font-size:13px">
-      <summary style="cursor:pointer;font-weight:700">What payment methods?</summary>
-      <div style="margin-top:6px">We accept cash, UPI and card payments at pickup. A deposit may be requested for some projects.</div>
-    </details>
-  </div>
-
-  <hr style="border:none;border-top:1px solid #f1f3f7;margin:12px 0;">
-
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    <div style="flex:1">
-      <strong>Selected preview</strong>
-      <div id="miniSummary" class="small" style="margin-top:8px;color:var(--muted)">No preview yet — fill the form to preview here.</div>
-    </div>
-
-    <div style="display:flex;gap:8px;align-items:center">
-      <!-- Simple image placeholders (inline SVG) -->
-      <div style="width:56px;height:56px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;border:1px solid #f1f3f5">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="14" x="2" y="5" rx="2" stroke="#d8c2e6" stroke-width="1.5"/></svg>
+ 
+      <!-- Country -->
+      <div class="appoint-field-group">
+        <label class="appoint-field-label" for="appoint-country">Country</label>
+        <span class="appoint-field-hint">For delivery timeline clarity.</span>
+        <select id="appoint-country" name="country" required>
+          <option value="" disabled selected>Select your country</option>
+          <option>India</option>
+          <option>United States</option>
+          <option>United Kingdom</option>
+          <option>United Arab Emirates</option>
+          <option>Australia</option>
+          <option>Singapore</option>
+          <option>Malaysia</option>
+          <option>Canada</option>
+          <option>Germany</option>
+          <option>France</option>
+          <option>Italy</option>
+          <option>Japan</option>
+          <option>South Korea</option>
+          <option>Pakistan</option>
+          <option>Bangladesh</option>
+          <option>Sri Lanka</option>
+          <option>Nepal</option>
+          <option>Other</option>
+        </select>
       </div>
-      <div style="width:56px;height:56px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;border:1px solid #f1f3f5">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7h16M4 12h10M4 17h16" stroke="#f9d6c1" stroke-width="1.5" stroke-linecap="round"/></svg>
+ 
+      <!-- City -->
+      <div class="appoint-field-group">
+        <label class="appoint-field-label" for="appoint-city">City</label>
+        <span class="appoint-field-hint">Which city are you based in?</span>
+        <input type="text" id="appoint-city" name="city" placeholder="e.g. Mumbai, Delhi, Dubai" required>
       </div>
-      <div style="width:56px;height:56px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;border:1px solid #f1f3f5">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="10" r="3" stroke="#e7d1ff" stroke-width="1.5"/><path d="M4 20c2-4 6-6 8-6s6 2 8 6" stroke="#e7d1ff" stroke-width="1.3" stroke-linecap="round"/></svg>
+ 
+      <hr class="appoint-section-sep">
+ 
+      <!-- Occasion -->
+      <div class="appoint-field-group">
+        <label class="appoint-field-label" for="appoint-occasion">Occasion</label>
+        <span class="appoint-field-hint">What are we dressing you for?</span>
+        <select id="appoint-occasion" name="occasion" required>
+          <option value="" disabled selected>Select your occasion</option>
+          <option value="wedding-guest">Wedding Guest</option>
+          <option value="bridesmaid">Bridesmaid</option>
+          <option value="haldi-cocktail-reception">Haldi / Cocktail / Reception</option>
+          <option value="resort-holiday">Resort / Holiday</option>
+          <option value="custom-event">Custom Event</option>
+          <option value="just-because">Just because I felt like it 💅</option>
+        </select>
       </div>
+ 
+      <!-- Outfit Reference -->
+      <div class="appoint-field-group">
+        <label class="appoint-field-label">Outfit Reference</label>
+        <span class="appoint-field-hint">Tell us exactly what you have in mind.</span>
+        <div class="appoint-outfit-tabs">
+          <button type="button" class="appoint-outfit-tab-btn active" onclick="switchOutfitTab('name', this)">I Know the Name</button>
+          <button type="button" class="appoint-outfit-tab-btn" onclick="switchOutfitTab('describe', this)">Describe It</button>
+          <button type="button" class="appoint-outfit-tab-btn" onclick="switchOutfitTab('upload', this)">Upload Image</button>
+        </div>
+        <div class="appoint-outfit-tab-panel active" id="appoint-outfit-name-panel">
+          <input type="text" id="appoint-outfit-name" name="outfit_name" placeholder="e.g. The Rani Set, Throneplay, Golden Hour Saree" required>
+        </div>
+        <div class="appoint-outfit-tab-panel" id="appoint-outfit-describe-panel">
+          <textarea name="outfit_description" placeholder="Describe the style, silhouette, fabric, color, or any inspiration you have in mind..." style="min-height:90px;"></textarea>
+        </div>
+        <div class="appoint-outfit-tab-panel" id="appoint-outfit-upload-panel">
+          <label class="appoint-upload-area" for="appoint-outfit-image">
+            <input type="file" id="appoint-outfit-image" name="outfit_image" accept="image/*" onchange="showFileName(this)">
+            <span class="appoint-upload-icon">📎</span>
+            <span class="appoint-upload-text">Drag & drop or <strong>browse</strong> to upload a screenshot</span>
+            <div id="appoint-file-name"></div>
+          </label>
+        </div>
+      </div>
+ 
+      <!-- Delivery Date -->
+      <div class="appoint-field-group">
+        <label class="appoint-field-label" for="appoint-required-by">When Do You Need It Delivered?</label>
+        <span class="appoint-field-hint">Earliest delivery is 15 days from today.</span>
+        <input type="date" id="appoint-required-by" name="delivery_date" required>
+      </div>
+ 
+      <!-- Size -->
+      <div class="appoint-field-group">
+        <label class="appoint-field-label">Size Preference</label>
+        <span class="appoint-field-hint">Choose how you'd like us to fit your outfit.</span>
+ 
+        <div class="appoint-size-cards">
+          <label class="appoint-size-card">
+            <input type="radio" name="size_type" value="standard" required onchange="handleSizeType(this.value)">
+            <div class="appoint-size-card-inner">
+              <span class="appoint-size-card-icon">📐</span>
+              <span class="appoint-size-card-title">Standard</span>
+              <span class="appoint-size-card-desc">I know my size — XS to XXL</span>
+            </div>
+          </label>
+          <label class="appoint-size-card">
+            <input type="radio" name="size_type" value="custom" onchange="handleSizeType(this.value)">
+            <div class="appoint-size-card-inner">
+              <span class="appoint-size-card-icon">✂️</span>
+              <span class="appoint-size-card-title">Custom</span>
+              <span class="appoint-size-card-desc">I'll share my exact measurements</span>
+            </div>
+          </label>
+          <label class="appoint-size-card">
+            <input type="radio" name="size_type" value="assistance" onchange="handleSizeType(this.value)">
+            <div class="appoint-size-card-inner">
+              <span class="appoint-size-card-icon">🤝</span>
+              <span class="appoint-size-card-title">Need Help</span>
+              <span class="appoint-size-card-desc">Guide me through sizing</span>
+            </div>
+          </label>
+        </div>
+ 
+        <!-- Standard Size Selector -->
+        <div class="appoint-standard-size-select" id="appoint-standardSizeSelect">
+          <span class="appoint-field-hint" style="margin-bottom:8px;display:block;">Select your size below.</span>
+          <div class="appoint-size-grid">
+            <label class="appoint-size-bubble"><input type="radio" name="standard_size" value="XS"><span class="appoint-size-bubble-label">XS</span></label>
+            <label class="appoint-size-bubble"><input type="radio" name="standard_size" value="S"><span class="appoint-size-bubble-label">S</span></label>
+            <label class="appoint-size-bubble"><input type="radio" name="standard_size" value="M"><span class="appoint-size-bubble-label">M</span></label>
+            <label class="appoint-size-bubble"><input type="radio" name="standard_size" value="L"><span class="appoint-size-bubble-label">L</span></label>
+            <label class="appoint-size-bubble"><input type="radio" name="standard_size" value="XL"><span class="appoint-size-bubble-label">XL</span></label>
+            <label class="appoint-size-bubble"><input type="radio" name="standard_size" value="XXL"><span class="appoint-size-bubble-label">XXL</span></label>
+          </div>
+        </div>
+ 
+        <!-- Custom Measurements -->
+        <div class="appoint-custom-measurements" id="appoint-customMeasurements">
+          <p class="appoint-custom-measurements-title">Your Measurements</p>
+          <p class="appoint-custom-measurements-hint">Fill in what you know. Leave the rest blank and we'll guide you. All measurements in inches.</p>
+          <div class="appoint-gender-toggle">
+            <button type="button" class="appoint-gender-btn active" onclick="setGender('female', this)">👗 Women</button>
+            <button type="button" class="appoint-gender-btn" onclick="setGender('male', this)">👔 Men</button>
+          </div>
+          <div class="appoint-measurements-grid" id="appoint-measurementsGrid">
+            <div class="appoint-measurement-field">
+              <label>Bust / Chest (inches)</label>
+              <input type="text" name="measure_bust" placeholder="e.g. 36">
+            </div>
+            <div class="appoint-measurement-field">
+              <label>Waist (inches)</label>
+              <input type="text" name="measure_waist" placeholder="e.g. 30">
+            </div>
+            <div class="appoint-measurement-field">
+              <label>Hips (inches)</label>
+              <input type="text" name="measure_hips" placeholder="e.g. 38">
+            </div>
+            <div class="appoint-measurement-field">
+              <label>Shoulder (inches)</label>
+              <input type="text" name="measure_shoulder" placeholder="e.g. 14">
+            </div>
+            <div class="appoint-measurement-field">
+              <label>Length (inches)</label>
+              <input type="text" name="measure_length" placeholder="e.g. 52">
+            </div>
+            <div class="appoint-measurement-field" id="appoint-field-inseam">
+              <label>Inseam (inches)</label>
+              <input type="text" name="measure_inseam" placeholder="e.g. 30">
+            </div>
+          </div>
+        </div>
+ 
+        <button type="button" class="appoint-size-chart-toggle" style="margin-top:14px;" onclick="document.getElementById('appoint-sizeChartModal').classList.add('open')">
+          📏 View Size Chart
+        </button>
+      </div>
+ 
+      <hr class="appoint-section-sep">
+ 
+      <!-- Address -->
+      <div class="appoint-field-group">
+        <label class="appoint-field-label">Delivery Address</label>
+        <span class="appoint-field-hint">Where should we send your look?</span>
+        <div class="appoint-address-grid">
+          <div class="appoint-full-width">
+            <input type="text" name="addr_flat" placeholder="Flat / House No. & Building Name" required>
+          </div>
+          <div class="appoint-full-width">
+            <input type="text" name="addr_street" placeholder="Street / Area / Locality" required>
+          </div>
+          <div>
+            <input type="text" name="addr_city" placeholder="City" required>
+          </div>
+          <div>
+            <input type="text" name="addr_state" placeholder="State / Province" required>
+          </div>
+          <div>
+            <input type="text" name="addr_pincode" placeholder="PIN / ZIP Code" required>
+          </div>
+          <div>
+            <input type="text" name="addr_country" placeholder="Country" required>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Notes -->
+      <div class="appoint-field-group">
+        <label class="appoint-field-label" for="appoint-notes">Anything We Should Know?</label>
+        <span class="appoint-field-hint">Color preference, modifications, budget range — all of it welcome.</span>
+        <textarea id="appoint-notes" name="notes" placeholder="The more you tell us, the better we dress you..."></textarea>
+      </div>
+ 
+      <!-- Submit -->
+      <div class="appoint-submit-wrap">
+        <button type="submit" class="appoint-submit-btn">
+          <span>✦ Secure My Look</span>
+        </button>
+        <p class="appoint-submit-note">We'll be in touch within 24–48 hours via WhatsApp.</p>
+      </div>
+ 
+    </form>
+    <?php endif; ?>
+ 
+    </div> <!-- appoint-form-card -->
+    </div> <!-- appoint-form-container -->
+  </div> <!-- appoint-content-grid -->
+</div> <!-- appoint-page-layout -->
+ 
+<script>
+  function showFileName(input) {
+    const display = document.getElementById('appoint-file-name');
+    if (input.files && input.files[0]) {
+      display.textContent = '✓ ' + input.files[0].name;
+    }
+  }
+</script>
+ 
+ 
+<!-- Size Chart Modal -->
+<div class="appoint-size-chart-modal" id="appoint-sizeChartModal">
+  <div class="appoint-size-chart-inner">
+    <button class="appoint-size-chart-close" onclick="document.getElementById('appoint-sizeChartModal').classList.remove('open')">&times;</button>
+    <h2 class="appoint-size-chart-title">Size Guide</h2>
+    <p class="appoint-size-chart-subtitle">All measurements are in inches. When between sizes, size up.</p>
+ 
+    <div class="appoint-size-chart-tabs">
+      <button class="appoint-size-tab active" onclick="switchTab('female', this)">Women</button>
+      <button class="appoint-size-tab" onclick="switchTab('male', this)">Men</button>
+      <button class="appoint-size-tab" onclick="switchTab('how', this)">How to Measure</button>
     </div>
-  </div>
-
-  <div style="margin-top:12px;font-size:12px;color:var(--muted)">
-    <strong>Where we send bookings</strong>
-    <div style="margin-top:6px"><?php echo h($mailCfg['smtp_user'] ?? 'worldofinanna@gmail.com'); ?></div>
-  </div>
-</aside>
-
+ 
+    <!-- WOMEN -->
+    <div class="appoint-size-chart-body active" id="appoint-tab-female">
+      <div class="appoint-size-table-wrap">
+        <table class="appoint-size-table">
+          <thead>
+            <tr>
+              <th>Size</th>
+              <th>Bust</th>
+              <th>Waist</th>
+              <th>Hips</th>
+              <th>Shoulder</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>XS</td><td>32</td><td>26</td><td>35</td><td>13.5</td></tr>
+            <tr><td>S</td><td>34</td><td>28</td><td>37</td><td>14</td></tr>
+            <tr><td>M</td><td>36</td><td>30</td><td>39</td><td>14.5</td></tr>
+            <tr><td>L</td><td>38</td><td>32</td><td>41</td><td>15</td></tr>
+            <tr><td>XL</td><td>40</td><td>34</td><td>43</td><td>15.5</td></tr>
+            <tr><td>XXL</td><td>42</td><td>36</td><td>45</td><td>16</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="appoint-size-note">All measurements are in inches. For sarees and lehengas, hip and waist measurements are most important. For blouses and tops, go by bust and shoulder.</p>
     </div>
+ 
+    <!-- MEN -->
+    <div class="appoint-size-chart-body" id="appoint-tab-male">
+      <div class="appoint-size-table-wrap">
+        <table class="appoint-size-table">
+          <thead>
+            <tr>
+              <th>Size</th>
+              <th>Chest</th>
+              <th>Waist</th>
+              <th>Hips</th>
+              <th>Shoulder</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>S</td><td>36</td><td>30</td><td>36</td><td>16</td></tr>
+            <tr><td>M</td><td>38</td><td>32</td><td>38</td><td>17</td></tr>
+            <tr><td>L</td><td>40</td><td>34</td><td>40</td><td>17.5</td></tr>
+            <tr><td>XL</td><td>42</td><td>36</td><td>42</td><td>18</td></tr>
+            <tr><td>XXL</td><td>44</td><td>38</td><td>44</td><td>18.5</td></tr>
+            <tr><td>3XL</td><td>46</td><td>40</td><td>46</td><td>19</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="appoint-size-note">All measurements are in inches. For sherwanis and kurtas, chest and shoulder are the key measurements. Waist is critical for fitted bottoms.</p>
+    </div>
+ 
+    <!-- HOW TO MEASURE -->
+    <div class="appoint-size-chart-body" id="appoint-tab-how">
+      <div class="appoint-body-figure-wrap">
+ 
+        <!-- Female figure SVG -->
+        <div class="appoint-body-figure">
+          <svg viewBox="0 0 100 220" xmlns="http://www.w3.org/2000/svg">
+            <!-- Head -->
+            <circle cx="50" cy="18" r="12" fill="none" stroke="#C4825A" stroke-width="1.5"/>
+            <!-- Neck -->
+            <line x1="50" y1="30" x2="50" y2="40" stroke="#C4825A" stroke-width="1.5"/>
+            <!-- Shoulders -->
+            <path d="M28 45 Q50 38 72 45" fill="none" stroke="#C4825A" stroke-width="1.5"/>
+            <!-- Bust line -->
+            <path d="M30 62 Q50 57 70 62" fill="none" stroke="#B8956A" stroke-width="1" stroke-dasharray="3,2"/>
+            <!-- Body torso -->
+            <path d="M28 45 L24 90 Q50 98 76 90 L72 45" fill="none" stroke="#C4825A" stroke-width="1.5"/>
+            <!-- Waist line -->
+            <path d="M26 78 Q50 72 74 78" fill="none" stroke="#B8956A" stroke-width="1" stroke-dasharray="3,2"/>
+            <!-- Hips line -->
+            <path d="M20 105 Q50 100 80 105" fill="none" stroke="#B8956A" stroke-width="1" stroke-dasharray="3,2"/>
+            <!-- Skirt/legs -->
+            <path d="M24 90 Q20 115 22 150 L40 150 L50 120 L60 150 L78 150 Q80 115 76 90 Q50 98 24 90Z" fill="none" stroke="#C4825A" stroke-width="1.5"/>
+            <!-- Arms -->
+            <path d="M28 45 L18 85" stroke="#C4825A" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M72 45 L82 85" stroke="#C4825A" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- Shoulder arrow -->
+            <text x="4" y="47" font-size="5.5" fill="#8A7A6A" font-family="DM Sans">Shoulder</text>
+            <!-- Bust arrow -->
+            <text x="2" y="64" font-size="5.5" fill="#8A7A6A" font-family="DM Sans">Bust</text>
+            <!-- Waist arrow -->
+            <text x="4" y="80" font-size="5.5" fill="#8A7A6A" font-family="DM Sans">Waist</text>
+            <!-- Hip arrow -->
+            <text x="6" y="108" font-size="5.5" fill="#8A7A6A" font-family="DM Sans">Hips</text>
+          </svg>
+          <span class="appoint-body-figure-label">Women</span>
+        </div>
+ 
+        <!-- Male figure SVG -->
+        <div class="appoint-body-figure">
+          <svg viewBox="0 0 100 220" xmlns="http://www.w3.org/2000/svg">
+            <!-- Head -->
+            <circle cx="50" cy="18" r="12" fill="none" stroke="#1A1208" stroke-width="1.5"/>
+            <!-- Neck -->
+            <line x1="50" y1="30" x2="50" y2="40" stroke="#1A1208" stroke-width="1.5"/>
+            <!-- Shoulders broad -->
+            <path d="M22 48 Q50 40 78 48" fill="none" stroke="#1A1208" stroke-width="1.5"/>
+            <!-- Chest line -->
+            <path d="M24 62 Q50 58 76 62" fill="none" stroke="#B8956A" stroke-width="1" stroke-dasharray="3,2"/>
+            <!-- Torso -->
+            <path d="M22 48 L24 95 Q50 100 76 95 L78 48" fill="none" stroke="#1A1208" stroke-width="1.5"/>
+            <!-- Waist line -->
+            <path d="M25 82 Q50 78 75 82" fill="none" stroke="#B8956A" stroke-width="1" stroke-dasharray="3,2"/>
+            <!-- Hip line -->
+            <path d="M23 100 Q50 96 77 100" fill="none" stroke="#B8956A" stroke-width="1" stroke-dasharray="3,2"/>
+            <!-- Legs -->
+            <path d="M24 95 Q22 120 24 155 L42 155 L50 115 L58 155 L76 155 Q78 120 76 95 Q50 100 24 95Z" fill="none" stroke="#1A1208" stroke-width="1.5"/>
+            <!-- Arms -->
+            <path d="M22 48 L14 90" stroke="#1A1208" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M78 48 L86 90" stroke="#1A1208" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- Labels -->
+            <text x="2" y="50" font-size="5.5" fill="#8A7A6A" font-family="DM Sans">Shoulder</text>
+            <text x="2" y="64" font-size="5.5" fill="#8A7A6A" font-family="DM Sans">Chest</text>
+            <text x="4" y="84" font-size="5.5" fill="#8A7A6A" font-family="DM Sans">Waist</text>
+            <text x="6" y="102" font-size="5.5" fill="#8A7A6A" font-family="DM Sans">Hips</text>
+          </svg>
+          <span class="appoint-body-figure-label">Men</span>
+        </div>
+ 
+        <!-- Measurement instructions -->
+        <div class="appoint-measure-list">
+          <div class="appoint-measure-item">
+            <span class="appoint-measure-name">Bust / Chest</span>
+            <span class="appoint-measure-where">Fullest part of your chest</span>
+          </div>
+          <div class="appoint-measure-item">
+            <span class="appoint-measure-name">Waist</span>
+            <span class="appoint-measure-where">Narrowest part of your torso</span>
+          </div>
+          <div class="appoint-measure-item">
+            <span class="appoint-measure-name">Hips</span>
+            <span class="appoint-measure-where">Fullest part of your hips</span>
+          </div>
+          <div class="appoint-measure-item">
+            <span class="appoint-measure-name">Shoulder</span>
+            <span class="appoint-measure-where">Across the back, shoulder to shoulder</span>
+          </div>
+          <div class="appoint-measure-item">
+            <span class="appoint-measure-name">Length</span>
+            <span class="appoint-measure-where">Shoulder to where you want it to end</span>
+          </div>
+        </div>
+ 
+      </div>
+      <p class="appoint-size-note">Use a soft measuring tape. Keep it parallel to the floor. Measure over your innerwear, not over heavy clothing. When in doubt, share your measurements with us and we'll guide you.</p>
+    </div>
+ 
   </div>
 </div>
-
-<!-- ---------- JS: preview, reset, header offset, category fallback (keeps dropdown safe) ---------- -->
+ 
 <script>
-/* Header overlap fix */
-(function(){
-  function setOffset(){
-    var headerSelectors = ['header', '.site-header', '#header', '.header', '.navbar', '.topbar'];
-    var hEl = null;
-    for(var i=0;i<headerSelectors.length;i++){
-      var el = document.querySelector(headerSelectors[i]);
-      if(el && el.offsetHeight > 0){
-        hEl = el; break;
-      }
+  function switchTab(tab, el) {
+    document.querySelectorAll('.appoint-size-chart-body').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.appoint-size-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('appoint-tab-' + tab).classList.add('active');
+    el.classList.add('active');
+  }
+ 
+  // Close on outside click
+  document.getElementById('appoint-sizeChartModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+</script>
+ 
+ 
+<script>
+  // Set minimum delivery date to 15 days from today
+  (function() {
+    const dateInput = document.getElementById('appoint-required-by');
+    const today = new Date();
+    today.setDate(today.getDate() + 15);
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dateInput.min = yyyy + '-' + mm + '-' + dd;
+  })();
+ 
+  function switchOutfitTab(tab, el) {
+    document.querySelectorAll('.appoint-outfit-tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.appoint-outfit-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('appoint-outfit-' + tab + '-panel').classList.add('active');
+    el.classList.add('active');
+  }
+ 
+  function handleSizeType(val) {
+    document.getElementById('appoint-standardSizeSelect').classList.toggle('visible', val === 'standard');
+    document.getElementById('appoint-customMeasurements').classList.toggle('visible', val === 'custom');
+  }
+ 
+  function setGender(gender, btn) {
+    document.querySelectorAll('.appoint-gender-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const inseam = document.getElementById('appoint-field-inseam');
+    const bustLabel = document.querySelector('[name="measure_bust"]').previousElementSibling;
+    if (gender === 'male') {
+      inseam.style.display = 'block';
+      bustLabel.textContent = 'Chest (inches)';
+    } else {
+      inseam.style.display = 'none';
+      bustLabel.textContent = 'Bust / Chest (inches)';
     }
-    var offset = 0;
-    if(hEl) offset = hEl.offsetHeight + 10;
-    document.documentElement.style.setProperty('--top-offset', offset + 'px');
   }
-  setOffset();
-  window.addEventListener('resize', setOffset);
-  setTimeout(setOffset,400);
-})();
-
-/* preview + reset: preview shows option text (label) instead of slug */
-function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
-function updateMiniSummary(){
-  var catEl = document.getElementById('category');
-  var catLabel = '';
-  if (catEl && catEl.selectedOptions && catEl.selectedOptions[0]) catLabel = catEl.selectedOptions[0].text;
-  var cs = document.getElementById('custom_service').value || '';
-  var date = document.getElementById('date').value || '';
-  var time = document.getElementById('time').value || '';
-  var name = document.getElementById('name').value || '';
-  var lines = [];
-  if(catLabel) lines.push(catLabel);
-  if(cs) lines.push('Design: ' + cs.substring(0,60) + (cs.length>60?'…':''));
-  if(date) lines.push('Date: ' + date);
-  if(time) lines.push('Time: ' + time);
-  if(name) lines.push('Name: ' + name);
-  var el = document.getElementById('miniSummary');
-  if (el) el.innerHTML = lines.length ? esc(lines.join(' • ')) : 'No preview yet — fill the form to preview here.';
-}
-['category','custom_service','date','time','name'].forEach(function(id){
-  var el = document.getElementById(id);
-  if(el) { el.addEventListener('input', updateMiniSummary); el.addEventListener('change', updateMiniSummary); }
-});
-updateMiniSummary();
-
-function resetForm(){
-  if(confirm('Reset the appointment form?')){
-    document.getElementById('apptForm').reset();
-    updateMiniSummary();
-  }
-}
-
-/* Debug + client fallback: log options and populate if empty (helps diagnose your "no options" issue) */
-(function(){
-  var catEl = document.getElementById('category');
-  if (!catEl) return;
-  try {
-    console.log('Category options:', [...catEl.options].map(o => ({v: o.value, t: o.text, d: o.disabled})));
-  } catch(e){ console.log('Category options: (error)', e); }
-
-  // If the select has only the disabled placeholder (or length <=1), populate from a client-side list
-  if (catEl && catEl.options.length <= 1) {
-    var fallback = [
-      {v:'co-ord-set', t:'Co-ord Set'},
-      {v:'dresses', t:'Dresses'},
-      {v:'shirts', t:'Shirts'},
-      {v:'pants', t:'Pants'},
-      {v:'suits', t:'Suits'},
-      {v:'saree', t:'Saree'}
-    ];
-    fallback.forEach(function(it){
-      var opt = document.createElement('option');
-      opt.value = it.v; opt.text = it.t;
-      catEl.appendChild(opt);
-    });
-    // restore preselected if server set it
-    try {
-      var pre = <?php echo json_encode((string)old('category'), JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>;
-      if (pre) catEl.value = pre;
-    } catch(e){}
-    console.log('Category select seemed empty — populated fallback options client-side.');
-  }
-})();
 </script>
 
 <?php
-// include footer if available
 $footerPath = __DIR__ . '/includes/footer.php';
 if (file_exists($footerPath)) include $footerPath;
 ?>

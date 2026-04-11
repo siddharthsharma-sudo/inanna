@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Clean URLs for His & Her pages
+RewriteRule ^his/?$ his.php [L,QSA]
+RewriteRule ^her/?$ her.php [L,QSA]
+
+# Clean URLs for Gender Shop pages
+RewriteRule ^his-shop/?$ his-shop.php [L,QSA]
+RewriteRule ^her-shop/?$ her-shop.php [L,QSA]

@@ -38,13 +38,13 @@
         }
 
         /* --- STICKY WRAPPER --- */
-        /* This holds the viewport still while we scroll through the section height */
+      
         .runway-sticky-wrapper {
             position: sticky;
             top: 0;
             height: 100vh;
             width: 100%;
-            overflow: hidden; /* Hide the overflow of the long track */
+            overflow: hidden; 
             display: flex;
             align-items: center;
             
@@ -120,8 +120,8 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            opacity: 0.4;
-            transform: translateY(10px);
+            opacity: 1;
+            transform: translateY(0);
             transition: all 0.5s ease-out;
         }
 
@@ -129,14 +129,14 @@
 
         .item-info h4 {
             font-size: 1.5rem;
-            color: #0e0e0e;
+            color: #000000;
             
         }
 
         .category {
             font-family: 'Montserrat', sans-serif;
             font-size: 0.75rem;
-            color: #0e0e0e;
+            color: #000000;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             margin-top: 0.25rem;

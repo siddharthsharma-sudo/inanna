@@ -135,14 +135,9 @@ function isActive($filename)
             <a href="woi.php">WOI</a>
             <a href="appointment.php">Appointment</a>
             <a href="products.php">Shop</a>
-            <div>
-                <strong>Our Collection</strong>
-                <div style="padding-left:10px;">
-                    <a href="no-plus-one.php">No Plus One</a>
-                    <a href="the-guest-list.php">The Guest List</a>
-                    <a href="till-sunrise.php">Till Sunrise</a>
-                    <a href="his-and-hers.php">His & Her's</a>
-                </div>
+            <div class="sidebar-collection-toggle" onclick="openCollectionSlide()">
+                <span>Our Collection</span>
+                <i class="bi bi-chevron-right sidebar-chevron"></i>
             </div>
 
             <?php if (!empty($categories)): ?>
@@ -155,40 +150,65 @@ function isActive($filename)
         </div>
 
         <div class="sidebar-bottom">
-            <i class="bi bi-person fs-3"></i>
             <?php if ($isLoggedIn): ?>
-                <div><?= htmlspecialchars($userName) ?></div>
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-person fs-3"></i>
+                    <div class="fw-medium"><?= htmlspecialchars($userName) ?></div>
+                </div>
                 <form method="post" class="mt-2">
                     <input type="hidden" name="logout_action" value="logout">
-                    <button type="submit" class="btn btn-outline-secondary btn-sm">Logout</button>
+                    <button type="submit" class="btn btn-outline-secondary btn-sm w-100">Logout</button>
                 </form>
             <?php else: ?>
-                <div class="mt-2">
-                    <a href="login.php" class="text-decoration-none">Login</a> ·
-                    <a href="register.php" class="text-decoration-none">Register</a>
+                <div class="mobile-auth-section">
+                    <div class="auth-row">
+                        <i class="bi bi-person"></i>
+                        <a class="login-link" href="login.php">Login</a>
+                    </div>
+                    <a class="register-link" href="register.php">Register</a>
                 </div>
             <?php endif; ?>
         </div>
     </div>
 
-    <nav id="mainNav" class="navbar navbar-expand-lg main-navbar fixed-top">
+    <!-- Secondary Sidebar for Collections -->
+    <div id="sidebar-collection" class="sidebar" aria-hidden="true" style="z-index: 100000;">
+        <div class="sidebar-header d-flex align-items-center mb-4">
+            <div class="sidebar-back" onclick="closeCollectionSlide()" style="cursor: pointer;">
+                <i class="bi bi-arrow-left fs-4"></i>
+            </div>
+            <span class="ms-3 fs-5 fw-medium">Our Collection</span>
+        </div>
+        
+        <div class="sidebar-links">
+            <!-- <a href="his-and-hers.php">His & Hers</a> -->
+            <a href="no-plus-one.php">No Plus One</a>
+            <a href="the-guest-list.php">The Guest List</a>
+            <a href="till-sunrise.php">Till Sunrise</a>
+        </div>
+    </div>
+
+    <nav id="mainNav" class="navbar navbar-expand-lg main-navbar fixed-top <?= $header_class ?? '' ?>">
         <div class="container custom-navbar d-flex align-items-center justify-content-between">
 
             <ul class="navbar-nav gap-lg-4 desktop-links">
                 <li class="nav-item"><a class="nav-link<?= isActive('index.php') ?>" href="./">Home</a></li>
                 <li class="nav-item"><a class="nav-link<?= isActive('woi.php') ?>" href="woi.php">WOI</a></li>
-                <li class="nav-item"><a class="nav-link<?= isActive('appointment.php') ?>"
-                        href="appointment.php">Appointment</a></li>
+                <li class="nav-item"><a class="nav-link<?= isActive('appointment.php') ?>" href="appointment.php">Appointment</a></li>
                 <li class="nav-item"><a class="nav-link<?= isActive('products.php') ?>" href="products.php">Shop</a>
                 </li>
                 <li class="nav-item our-collection">
                     <a class="nav-link" href="#" role="button">Our Collection</a>
                     <button class="collections-dot d-lg-none" type="button" aria-label="Open collections"></button>
                     <div class="mega-collections">
+
                         <div class="mega-inner">
                             <div class="collection-list">
                                 <div class="collection-heading">Collections</div>
-                                <a class="collection-item is-active" href="no-plus-one.php" data-title="No Plus One"
+                                <!-- <a class="collection-item is-active" href="" data-title="His and Hers"
+                                    data-images="assets/images/his-her/img-11.webp,assets/images/his-her/img-12.webp">His
+                                    & Hers</a> -->
+                                <a class="collection-item" href="no-plus-one.php" data-title="No Plus One"
                                     data-images="assets/images/noplus/img5.webp,assets/images/noplus/img7.webp,assets/images/noplus/img8.webp">No
                                     Plus One</a>
                                 <a class="collection-item" href="the-guest-list.php" data-title="The Guest List"
@@ -197,16 +217,34 @@ function isActive($filename)
                                 <a class="collection-item" href="till-sunrise.php" data-title="Till Sunrise"
                                     data-images="assets/images/tillsunrise/img1.avif,assets/images/tillsunrise/img3.webp,assets/images/tillsunrise/img7.webp">Till
                                     Sunrise</a>
-                                <a class="collection-item" href="his-and-hers.php" data-title="His and Hers"
-                                    data-images="https://images.unsplash.com/photo-1549439602-43ebca2327af,https://images.unsplash.com/photo-1596704017254-9b121068fb31,https://images.unsplash.com/photo-1512496015851-a90fb38ba796">His
-                                    & Her's</a>
                             </div>
                             <div class="collection-preview">
-                                <div class="preview-title">No Plus One</div>
-                                <div class="preview-grid">
+                                <div class="preview-title">His and Hers</div>
+                                <div class="preview-grid" style="display: none;">
                                     <img alt="" />
                                     <img alt="" />
                                     <img alt="" />
+                                </div>
+                                <div class="preview-grid-his-hers" style="display: grid;">
+                                    <a href="his.php" class="his-hers-img-link">
+                                        <div class="his-hers-img-wrap">
+                                            <img src="assets/images/his-her/his.webp" alt="His">
+                                        </div>
+                                        <span class="his-hers-label">HIS</span>
+                                    </a>
+                                    <div class="his-hers-content-wrap">
+                                        <div class="his-hers-inner-content">
+                                            <h3>INANNA</h3>
+                                            <p>Discover the essence of timeless elegance with the His & Hers collection. A symphony of style, crafted for those who celebrate life together.</p>
+                                        </div>
+                                    </div>
+                                    <a href="her.php" class="his-hers-img-link">
+                                        <div class="his-hers-img-wrap">
+                                            <img src="assets/images/his-her/image-2.webp" alt="Her">
+                                        </div>
+                                        <span class="his-hers-label">HER</span>
+                                    </a>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -287,27 +325,49 @@ function isActive($filename)
             }
             var items = oc.querySelectorAll('.collection-item');
             var titleEl = oc.querySelector('.preview-title');
-            var imgs = oc.querySelectorAll('.preview-grid img');
+            var standardGrid = oc.querySelector('.preview-grid');
+            var hisHersGrid = oc.querySelector('.preview-grid-his-hers');
+            var imgs = standardGrid ? standardGrid.querySelectorAll('img') : [];
+
             function applyItem(btn) {
                 items.forEach(function (b) { b.classList.remove('is-active'); });
                 btn.classList.add('is-active');
                 var t = btn.getAttribute('data-title') || '';
-                var arr = (btn.getAttribute('data-images') || '').split(',');
                 if (titleEl) titleEl.textContent = t;
-                imgs.forEach(function (img, i) {
-                    img.classList.remove('loaded');
-                    var src = arr[i] || '';
-                    if (src) {
-                        if (img.src === src) {
-                            setTimeout(function () { img.classList.add('loaded'); }, 30);
-                        } else {
-                            img.onload = function () { img.classList.add('loaded'); img.onload = null; };
-                            img.src = src;
-                        }
-                    } else {
-                        img.removeAttribute('src');
+
+                if (t === 'His and Hers' || t === "His & Hers" || t === "His and Hers") {
+                    if (standardGrid) standardGrid.style.display = 'none';
+                    if (hisHersGrid) {
+                        hisHersGrid.style.display = 'grid';
+                        // Trigger simple fade-in for His/Hers images
+                        var hhImgs = hisHersGrid.querySelectorAll('img');
+                        hhImgs.forEach(function(img) {
+                             img.classList.remove('loaded');
+                             // Force reflow
+                             void img.offsetWidth;
+                             img.classList.add('loaded');
+                        });
                     }
-                });
+                } else {
+                    if (hisHersGrid) hisHersGrid.style.display = 'none';
+                    if (standardGrid) standardGrid.style.display = 'grid';
+
+                    var arr = (btn.getAttribute('data-images') || '').split(',');
+                    imgs.forEach(function (img, i) {
+                        img.classList.remove('loaded');
+                        var src = arr[i] || '';
+                        if (src) {
+                            if (img.src === src) {
+                                setTimeout(function () { img.classList.add('loaded'); }, 30);
+                            } else {
+                                img.onload = function () { img.classList.add('loaded'); img.onload = null; };
+                                img.src = src;
+                            }
+                        } else {
+                            img.removeAttribute('src');
+                        }
+                    });
+                }
             }
             var initial = oc.querySelector('.collection-item.is-active') || items[0];
             if (initial) applyItem(initial);
@@ -329,16 +389,78 @@ function isActive($filename)
             document.getElementById("sidebar").style.left = "-100%";
             document.getElementById("sidebar").setAttribute('aria-hidden', 'true');
         }
+        function openCollectionSlide() {
+            var main = document.getElementById("sidebar");
+            var coll = document.getElementById("sidebar-collection");
+            if (main) {
+                main.style.left = "-100%";
+                main.setAttribute('aria-hidden', 'true');
+            }
+            if (coll) {
+                coll.style.left = "0";
+                coll.setAttribute('aria-hidden', 'false');
+            }
+        }
+        function closeCollectionSlide() {
+            var main = document.getElementById("sidebar");
+            var coll = document.getElementById("sidebar-collection");
+            if (coll) {
+                coll.style.left = "-100%";
+                coll.setAttribute('aria-hidden', 'true');
+            }
+            if (main) {
+                main.style.left = "0";
+                main.setAttribute('aria-hidden', 'false');
+            }
+        }
+        function toggleSidebarCollection() {
+             var menu = document.getElementById("sidebar-collection-menu");
+             var chevron = document.querySelector(".sidebar-collection-toggle .sidebar-chevron");
+             if (menu.style.display === "none" || menu.style.display === "") {
+                 menu.style.display = "block";
+                 chevron.style.transform = "rotate(180deg)";
+             } else {
+                 menu.style.display = "none";
+                 chevron.style.transform = "rotate(0deg)";
+             }
+        }
     </script>
 
     <script>
         (function () {
             var nav = document.getElementById('mainNav');
             if (!nav) return;
+            
+            var lastScrollY = window.scrollY || 0;
+            var scrollThreshold = 10; // Minimum scroll before hiding
+            
             function update() {
-                var y = window.scrollY || 0;
-                if (y > 10) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+                var currentScrollY = window.scrollY || 0;
+                
+                // Add/remove 'scrolled' class based on position
+                if (currentScrollY > 10) {
+                    nav.classList.add('scrolled');
+                } else {
+                    nav.classList.remove('scrolled');
+                }
+                
+                // Smart Sticky: Hide on scroll down, show on scroll up
+                // Only act if scrolled more than threshold
+                if (Math.abs(currentScrollY - lastScrollY) > scrollThreshold) {
+                    if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                        // Scrolling down - hide
+                        nav.classList.add('navbar-hidden');
+                        document.body.classList.add('navbar-hidden');
+                    } else {
+                        // Scrolling up - show
+                        nav.classList.remove('navbar-hidden');
+                        document.body.classList.remove('navbar-hidden');
+                    }
+                }
+                
+                lastScrollY = currentScrollY;
             }
+            
             window.addEventListener('scroll', update, { passive: true });
             window.addEventListener('load', update);
             window.addEventListener('resize', update);
@@ -369,10 +491,14 @@ function isActive($filename)
 
                     // Toggle handler
                     toggle.addEventListener('click', function (ev) {
-                        ev.preventDefault();
-                        ev.stopPropagation(); // avoid document click handler immediately closing it
+                        // Only prevent default if it's truly a toggle action
+                        if (toggle.getAttribute('href') === '#') {
+                            ev.preventDefault();
+                        }
+                        ev.stopPropagation(); 
 
                         var isOpen = menu.classList.contains('show');
+                        
                         // close any other open dropdowns first
                         document.querySelectorAll('.dropdown-menu.show').forEach(function (m) {
                             if (m !== menu) {

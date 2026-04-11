@@ -699,13 +699,13 @@ include __DIR__ . '/includes/header.php';
     
     <section class="world-of-inanna-section">
         <h2 class="world-of-inanna-heading">WORLD OF INANNA</h2>
-        <p class="qodart-subheading">"QODART E-ILAHI"</p>
+        <p class="qodart-subheading">"QUDRAT-E-ILAHI"</p>
         
-        <p class="inanna-description">Rooted in the belief that beauty exists in everything—even in what may traditionally be seen as flawed—I am inspired to *embrace and celebrate the unconventional*. This philosophy infuses my designs with a unique aesthetic that challenges the norms of fashion.</p>
+        <p class="inanna-description">Rooted in the belief that beauty exists in everything—even in what may traditionally be seen as flawed—I am inspired to <strong>embrace and celebrate the unconventional</strong>. This philosophy infuses my designs with a unique aesthetic that challenges the norms of fashion.</p>
         
         <p class="inanna-description">Guided by Alexander McQueen’s principle of mastering the rules before breaking them, my creations are not only innovative but deeply respectful of craftsmanship and tradition.</p>
         
-        <p class="inanna-description">Introducing *INANNA, a brand born from passion and inspired by the Sumerian goddess of love and power. Built on the pillars of **boundless creativity, ethics, and slow fashion*, the world of INANNA seeks to inspire a broader appreciation of beauty, encouraging us all to look beyond societal norms and embrace diversity in all its forms.</p>
+        <p class="inanna-description">Introducing <strong>INANNA</strong>, a brand born from passion and inspired by the Sumerian goddess of love and power. Built on the pillars of <strong>boundless creativity, ethics, and slow fashion</strong>, the world of INANNA seeks to inspire a broader appreciation of beauty, encouraging us all to look beyond societal norms and embrace diversity in all its forms.</p>
     </section>
     
 
